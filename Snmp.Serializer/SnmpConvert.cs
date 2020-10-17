@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Snmp.Model.Packet;
+using Snmp.Serializer.CheckExtensions;
 
 namespace Snmp.Serializer
 {
@@ -13,6 +14,8 @@ namespace Snmp.Serializer
 
         public static IEnumerable<byte> Serialize(this SnmpBasePacket packet)
         {
+            packet.GeneralCheck();
+
             throw new NotImplementedException();
         }
     }
