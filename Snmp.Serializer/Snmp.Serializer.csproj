@@ -8,4 +8,8 @@
     <ProjectReference Include="..\Snmp.Model\Snmp.Model.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="CheckExtensions\" />
+  </ItemGroup>
+
 </Project>
