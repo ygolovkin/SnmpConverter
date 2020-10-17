@@ -3,9 +3,9 @@ using Snmp.Model.Packet;
 
 namespace Snmp.Serializer.CheckExtensions
 {
-    public static class CheckPacketExtensions
+    internal static class CheckPacketExtensions
     {
-        public static void GeneralCheck(this SnmpBasePacket packet)
+        internal static void GeneralCheck(this SnmpBasePacket packet)
         {
             if (packet is null)
             {

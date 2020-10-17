@@ -1,10 +1,10 @@
 ﻿
 namespace Snmp.Serializer
 {
-    public static class SnmpConstants
+    internal static class SnmpConstants
     {
-        public const byte LOWEST_BYTE = 0x00;
-        public const byte BIGGEST_BYTE = 0x80;
-        public const byte HIGHEST_BYTE = 0xff;
+        internal const byte LOWEST_BYTE = 0x00;
+        internal const byte BIGGEST_BYTE = 0x80;
+        internal const byte HIGHEST_BYTE = 0xff;
     }
 }

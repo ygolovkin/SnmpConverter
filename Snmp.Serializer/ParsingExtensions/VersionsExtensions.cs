@@ -4,9 +4,9 @@ using Snmp.Model.Enums;
 
 namespace Snmp.Serializer.ParsingExtensions
 {
-    public static class VersionsExtensions
+    internal static class VersionsExtensions
     {
-        public static IEnumerable<byte> Serialize(this SnmpVersion source)
+        internal static IEnumerable<byte> Serialize(this SnmpVersion source)
         {
             var buffer = ((int) source).Serialize();
 

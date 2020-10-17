@@ -5,9 +5,9 @@ using System.Linq;
 
 namespace Snmp.Serializer.ParsingExtensions
 {
-    public static class IntegerExtensions
+    internal static class IntegerExtensions
     {
-        public static IEnumerable<byte> Serialize(this int source)
+        internal static IEnumerable<byte> Serialize(this int source)
         {
             var bytes = BitConverter.GetBytes(source);
 
