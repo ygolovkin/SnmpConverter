@@ -1,21 +1,29 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 
 namespace Snmp.Serializer.HelperExtensions
 {
     internal static class ByteArrayExtensions
     {
-        internal static byte[] Append(this byte[] source, byte value)
+        internal static IEnumerable<byte> Append(this IEnumerable<byte> source, byte value)
         {
             var appendArray = new[] { value };
 
-            return source is null ? appendArray : source.Concat(appendArray).ToArray();
+            return source is null ? appendArray : source.Concat(appendArray);
         }
 
-        internal static byte[] Prepend(this byte[] source, byte value)
+        internal static IEnumerable<byte> Append(this IEnumerable<byte> source, byte[] value)
+        {
+            if (value is null || !value.Any()) return source;
+
+            return source is null ? value : source.Concat(value);
+        }
+
+        internal static IEnumerable<byte> Prepend(this IEnumerable<byte> source, byte value)
         {
             var prependArray = new[] { value };
 
-            return source is null ? prependArray : prependArray.Concat(source).ToArray();
+            return source is null ? prependArray : prependArray.Concat(source);
         }
     }
 }

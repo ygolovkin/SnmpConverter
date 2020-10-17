@@ -9,7 +9,7 @@ namespace Snmp.Serializer.CheckExtensions
         {
             if (packet is null)
             {
-                throw new SnmpException("Packet can't be null.");
+                throw new SnmpException("Packet cannot be null.");
             }
         }
     }
