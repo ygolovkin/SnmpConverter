@@ -1,49 +1,41 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
 using Snmp.Model.Exceptions;
 
 namespace Snmp.Serializer.HelperExtensions
 {
     public static class LengthExtensions
     {
-        public static IEnumerable<byte> LengthEncode(this IEnumerable<byte> source, int length)
+        public static IEnumerable<byte> LengthEncode(this int source)
         {
-            if (length < 0)
+            if (source < 0)
             {
                 throw new SnmpException("Length cannot be less then 0.");
             }
 
-            var len = BitConverter.GetBytes(length);
-            var buffer = new byte[0];
+            var bytes = BitConverter.GetBytes(source);
+            var buffer = new byte[] { };
 
             for (var i = 3; i >= 0; i--)
             {
-                if (len[i] != SnmpConstants.LOWEST_BYTE || buffer.Any())
+                if (bytes[i] != 0 || buffer.Length > 0)
                 {
-                    buffer = buffer.Append(len[i]).ToArray();
+                    buffer = buffer.Append(bytes[i]).ToArray();
                 }
             }
-            if (!buffer.Any())
+
+            if (buffer.Length == 0)
             {
                 buffer = buffer.Append(SnmpConstants.LOWEST_BYTE).ToArray();
             }
-
-            if (buffer.Length == 1 && (buffer.First() & SnmpConstants.BIGGEST_BYTE) == 0)
-            {
-                source = source.Append(buffer);
-            }
-            else
+            if (buffer.Length != 1 || (buffer.First() & SnmpConstants.BIGGEST_BYTE) != 0)
             {
                 var encHeader = (byte)buffer.Length;
                 encHeader = (byte)(encHeader | SnmpConstants.BIGGEST_BYTE);
-                source = source.Append(encHeader);
-                source = source.Append(buffer);
+                buffer = buffer.Prepend(encHeader).ToArray();
             }
-
-            return source;
+            return buffer;
         }
     }
 }

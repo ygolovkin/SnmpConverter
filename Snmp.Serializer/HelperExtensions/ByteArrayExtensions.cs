@@ -12,7 +12,7 @@ namespace Snmp.Serializer.HelperExtensions
             return source is null ? appendArray : source.Concat(appendArray);
         }
 
-        internal static IEnumerable<byte> Append(this IEnumerable<byte> source, byte[] value)
+        internal static IEnumerable<byte> Append(this IEnumerable<byte> source, IEnumerable<byte> value)
         {
             if (value is null || !value.Any()) return source;
 
@@ -24,6 +24,13 @@ namespace Snmp.Serializer.HelperExtensions
             var prependArray = new[] { value };
 
             return source is null ? prependArray : prependArray.Concat(source);
+        }
+
+        internal static IEnumerable<byte> Prepend(this IEnumerable<byte> source, IEnumerable<byte> value)
+        {
+            if (value is null || !value.Any()) return source;
+
+            return source is null ? value : value.Concat(source);
         }
     }
 }

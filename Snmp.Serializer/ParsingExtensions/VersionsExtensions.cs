@@ -11,8 +11,7 @@ namespace Snmp.Serializer.ParsingExtensions
         internal static IEnumerable<byte> VersionEncode(this SnmpVersion source)
         {
             var buffer = ((int) source).IntegerEncode().ToArray();
-            buffer = buffer.Append((byte)source).ToArray();
-            return buffer.LengthEncode(buffer.Length);
+            return buffer.EncodeType(SnmpValueType.Integer);
         }
     }
 }
