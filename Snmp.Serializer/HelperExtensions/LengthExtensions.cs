@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Snmp.Model.Exceptions;
+using Snmp.Serializer.CheckExtensions;
 
 namespace Snmp.Serializer.HelperExtensions
 {
@@ -37,5 +38,32 @@ namespace Snmp.Serializer.HelperExtensions
             }
             return buffer;
         }
+        public static int LengthDecode(this IEnumerable<byte> source, ref int offset)
+        {
+            source.CheckLength(offset);
+            var array = source.ToArray();
+
+            int length;
+            if ((array[offset] & SnmpConstants.BIGGEST_BYTE) == 0)
+            {
+                length = array[offset++];
+                return length;
+            }
+            else
+            {
+                length = array[offset++] & ~SnmpConstants.BIGGEST_BYTE;
+                var value = 0;
+                for (int i = 0; i < length; i++)
+                {
+                    value <<= 8;
+                    value |= array[offset++];
+                    if (offset > array.Length || (i < (length - 1) && offset == array.Length))
+                    {
+                        throw new SnmpException("Array to short");
+                    }
+                }
+                return value;
+            }
+        }    
     }
 }

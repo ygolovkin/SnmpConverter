@@ -69,5 +69,6 @@ namespace Snmp.Serializer.ParsingExtensions
 
             return buffer;
         }
+
     }
 }
