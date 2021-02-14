@@ -7,8 +7,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Snmp.Model", "Snmp.Model\Sn
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Snmp.Serializer", "Snmp.Serializer\Snmp.Serializer.csproj", "{A1A4AB84-6E6D-4AAB-B145-02DF7B303A85}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Snmp.Test", "Snmp.Test\Snmp.Test.csproj", "{C4CD6EB8-8EC5-4893-B6A3-71D036EEF4AA}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -23,10 +21,6 @@ Global
 		{A1A4AB84-6E6D-4AAB-B145-02DF7B303A85}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A1A4AB84-6E6D-4AAB-B145-02DF7B303A85}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A1A4AB84-6E6D-4AAB-B145-02DF7B303A85}.Release|Any CPU.Build.0 = Release|Any CPU
-		{C4CD6EB8-8EC5-4893-B6A3-71D036EEF4AA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{C4CD6EB8-8EC5-4893-B6A3-71D036EEF4AA}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{C4CD6EB8-8EC5-4893-B6A3-71D036EEF4AA}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{C4CD6EB8-8EC5-4893-B6A3-71D036EEF4AA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

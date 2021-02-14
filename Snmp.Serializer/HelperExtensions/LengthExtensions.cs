@@ -30,10 +30,10 @@ namespace Snmp.Serializer.HelperExtensions
             {
                 buffer = buffer.Append(SnmpConstants.LOWEST_BYTE).ToArray();
             }
-            if (buffer.Length != 1 || (buffer.First() & SnmpConstants.BIGGEST_BYTE) != 0)
+            if (buffer.Length != 1 || (buffer.First() & SnmpConstants.SNMP_BIGGEST_BYTE) != 0)
             {
                 var encHeader = (byte)buffer.Length;
-                encHeader = (byte)(encHeader | SnmpConstants.BIGGEST_BYTE);
+                encHeader = (byte)(encHeader | SnmpConstants.SNMP_BIGGEST_BYTE);
                 buffer = buffer.Prepend(encHeader).ToArray();
             }
             return buffer;
@@ -44,14 +44,14 @@ namespace Snmp.Serializer.HelperExtensions
             var array = source.ToArray();
 
             int length;
-            if ((array[offset] & SnmpConstants.BIGGEST_BYTE) == 0)
+            if ((array[offset] & SnmpConstants.SNMP_BIGGEST_BYTE) == 0)
             {
                 length = array[offset++];
                 return length;
             }
             else
             {
-                length = array[offset++] & ~SnmpConstants.BIGGEST_BYTE;
+                length = array[offset++] & ~SnmpConstants.SNMP_BIGGEST_BYTE;
                 var value = 0;
                 for (int i = 0; i < length; i++)
                 {

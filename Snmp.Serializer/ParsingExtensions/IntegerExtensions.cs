@@ -28,7 +28,7 @@ namespace Snmp.Serializer.ParsingExtensions
                     buffer = buffer.Append(SnmpConstants.HIGHEST_BYTE).ToArray();
                 }
 
-                if ((buffer.First() & SnmpConstants.BIGGEST_BYTE) == 0)
+                if ((buffer.First() & SnmpConstants.SNMP_BIGGEST_BYTE) == 0)
                 {
                     buffer = buffer.Prepend(SnmpConstants.HIGHEST_BYTE).ToArray();
                 }
@@ -49,7 +49,7 @@ namespace Snmp.Serializer.ParsingExtensions
 
                 if (buffer.Any())
                 {
-                    if ((buffer.First() & SnmpConstants.BIGGEST_BYTE) != 0)
+                    if ((buffer.First() & SnmpConstants.SNMP_BIGGEST_BYTE) != 0)
                     {
                         buffer = buffer.Prepend(SnmpConstants.LOWEST_BYTE).ToArray();
                     }
@@ -62,7 +62,7 @@ namespace Snmp.Serializer.ParsingExtensions
 
             if (buffer.Length > 1 && 
                 buffer.First() == SnmpConstants.HIGHEST_BYTE &&
-                (buffer[1] & SnmpConstants.BIGGEST_BYTE) != 0)
+                (buffer[1] & SnmpConstants.SNMP_BIGGEST_BYTE) != 0)
             {
                 buffer = buffer.Prepend(SnmpConstants.LOWEST_BYTE).ToArray();
             }
