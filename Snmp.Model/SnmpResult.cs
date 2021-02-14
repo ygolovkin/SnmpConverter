@@ -2,11 +2,13 @@
 {
     public class SnmpResult<T>
     {
-        public T? Value { get; private set; }
+        private readonly string? _error;
 
-        public string? Error { get; set; }
+        public T Value { get; private set; }
 
-        public bool HasValue => Error == null;
+        public string Error => _error is null ? string.Empty : _error;
+
+        public bool HasValue => _error is null;
 
         public SnmpResult(T value)
         {
@@ -15,7 +17,7 @@
 
         public SnmpResult(string error)
         {
-            Error = error;
+            _error = error;
         }
 
         public static implicit operator bool(SnmpResult<T> result)
