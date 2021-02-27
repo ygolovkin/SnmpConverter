@@ -50,10 +50,10 @@ namespace Snmp.Serializer.HelperExtensions
             if (remainder != 0) Buffer.BlockCopy(key, 0, tempary, key.Length * count, remainder);
 
             byte[] hash = algoritmh.ComputeHash(tempary);
-            byte[] tmp = new byte[hash.Length + hash.Length + engineId.Count];
+            byte[] tmp = new byte[hash.Length + hash.Length + engineId.Length];
             Buffer.BlockCopy(hash, 0, tmp, 0, hash.Length);
-            Buffer.BlockCopy(engineId.ToArray(), 0, tmp, hash.Length, engineId.Count);
-            Buffer.BlockCopy(hash, 0, tmp, hash.Length + engineId.Count, hash.Length);
+            Buffer.BlockCopy(engineId.ToArray(), 0, tmp, hash.Length, engineId.Length);
+            Buffer.BlockCopy(hash, 0, tmp, hash.Length + engineId.Length, hash.Length);
 
             byte[] result = algoritmh.ComputeHash(tmp);
             algoritmh.Clear();

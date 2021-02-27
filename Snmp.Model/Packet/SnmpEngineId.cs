@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
 namespace Snmp.Model.Packet
@@ -10,7 +9,7 @@ namespace Snmp.Model.Packet
     {
         private readonly byte[] _engineId;
 
-        public int Count => _engineId.Length;
+        public int Length => _engineId.Length;
 
         public byte this[int i]
         {
@@ -65,7 +64,7 @@ namespace Snmp.Model.Packet
                 return true;
             }
 
-            if (obj is not SnmpEngineId engineId || _engineId.Length != engineId.Count)
+            if (obj is not SnmpEngineId engineId || _engineId.Length != engineId.Length)
             {
                 return false;
             }
