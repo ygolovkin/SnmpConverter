@@ -1,7 +1,7 @@
 ﻿using System;
 using Snmp.Model;
+using Snmp.Model.Exceptions;
 using Snmp.Model.Packet;
-using Snmp.Serializer.CheckExtensions;
 
 namespace Snmp.Serializer
 {
@@ -21,16 +21,28 @@ namespace Snmp.Serializer
                 return packet switch
                 {
                     SnmpPacketV2C v2c => v2c.Serialize(),
-                    _ => new SnmpResult<byte[]>("Incorrect packet format")
+                    _ => throw new SnmpException("Incorrect packet format")
                 };
             }
 
-            return new SnmpResult<byte[]>(result.Error);
+            throw new SnmpException(result.Error);
         }
+
+
 
         private static SnmpResult<byte[]> Serialize(this SnmpPacketV2C packet)
         {
             throw new NotImplementedException();
+        }
+
+        private static SnmpResult<bool> IsCorrect(this SnmpBasePacket packet)
+        {
+            if (packet is null)
+            {
+                return new SnmpResult<bool>("Packet cannot be null");
+            }
+            
+            return new SnmpResult<bool>(true);
         }
     }
 }
