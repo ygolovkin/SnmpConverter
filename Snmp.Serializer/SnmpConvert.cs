@@ -21,7 +21,6 @@ namespace Snmp.Serializer
                 return packet switch
                 {
                     SnmpPacketV2C v2c => v2c.Serialize(),
-                    SnmpPacketV3 v3 => v3.Serialize(),
                     _ => new SnmpResult<byte[]>("Incorrect packet format")
                 };
             }
@@ -30,11 +29,6 @@ namespace Snmp.Serializer
         }
 
         private static SnmpResult<byte[]> Serialize(this SnmpPacketV2C packet)
-        {
-            throw new NotImplementedException();
-        }
-
-        private static SnmpResult<byte[]> Serialize(this SnmpPacketV3 packet)
         {
             throw new NotImplementedException();
         }
