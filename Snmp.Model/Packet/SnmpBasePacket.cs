@@ -7,9 +7,9 @@ namespace Snmp.Model.Packet
     {
         public SnmpVersion Version { get; protected set; }
 
-        public int RequestId { get; set; }
-
         public SnmpTypeRequest TypeRequest { get; set; }
+
+        public int RequestId { get; set; }
 
         public SnmpErrorStatus ErrorStatus { get; set; }
 
