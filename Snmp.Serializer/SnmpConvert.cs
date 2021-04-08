@@ -9,7 +9,12 @@ namespace Snmp.Serializer
     {
         public static SnmpBasePacket Serialize(this byte[] source)
         {
-            throw new NotImplementedException();
+            return source.Serialize(0);
+        }
+
+        public static SnmpBasePacket Serialize(this byte[] source, int offset)
+        {
+
         }
 
         public static SnmpResult<byte[]> Serialize(this SnmpBasePacket packet)
@@ -27,13 +32,13 @@ namespace Snmp.Serializer
 
             throw new SnmpException(result.Error);
         }
-
-
-
+        
         private static SnmpResult<byte[]> Serialize(this SnmpPacketV2C packet)
         {
             throw new NotImplementedException();
         }
+
+
 
         private static SnmpResult<bool> IsCorrect(this SnmpBasePacket packet)
         {

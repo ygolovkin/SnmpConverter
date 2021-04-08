@@ -2,15 +2,15 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Snmp.Serializer.ParsingExtensions
+namespace Snmp.Serializer
 {
     internal static class IntegerExtensions
     {
-        internal static IEnumerable<byte> IntegerEncode(this int source)
+        internal static byte[] ToByteArray(this int source)
         {
             var bytes = BitConverter.GetBytes(source);
 
-            var buffer = new byte[0];
+            var buffer = Array.Empty<byte>();
 
             if (source < 0)
             {
