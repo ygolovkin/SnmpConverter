@@ -1,10 +1,11 @@
-﻿using Snmp.Model.Exceptions;
+﻿using System;
+using Snmp.Model.Exceptions;
 
 namespace Snmp.Model
 {
     public class SnmpResult<T>
     {
-        private readonly string? _error;
+        private string? _error;
 
         public T Value { get; } = default!;
 
@@ -32,6 +33,16 @@ namespace Snmp.Model
         public void HandleError()
         {
             if(HasError) throw new SnmpException(Error);
+        }
+
+        public void HandleError(Func<T, bool> predicate, string message)
+        {
+            if (predicate != null && predicate(Value))
+            {
+                _error = message;
+            }
+
+            if (HasError) throw new SnmpException(Error);
         }
     }
 }

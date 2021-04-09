@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using Snmp.Model;
 using Snmp.Model.Enums;
 using Snmp.Model.Exceptions;
@@ -19,7 +20,7 @@ namespace Snmp.Serializer
 
             var lengthResult = source.GetLength(ref offset);
             lengthResult.HandleError();
-            if (lengthResult.Value < 2) throw new SnmpException("Array too short");
+            lengthResult.HandleError(length => length < 2, "Array too short");
 
             var versionResult = source.ToVersion(ref offset);
             versionResult.HandleError();
@@ -33,7 +34,28 @@ namespace Snmp.Serializer
 
         private static SnmpPacketV2C SerializeV2c(this byte[] source, int offset)
         {
+            var packet = new SnmpPacketV2C();
 
+            var communityResult = source.ToString(ref offset);
+            communityResult.HandleError();
+            packet.Community = communityResult.Value;
+
+            var typeRequestResult = source.ToTypeRequest(ref offset);
+            typeRequestResult.HandleError();
+            packet.TypeRequest = typeRequestResult.Value;
+
+            var lengthResult = source.GetLength(ref offset);
+            lengthResult.HandleError();
+
+            //request id
+
+            //error status
+
+            //error index
+
+            //variable bindings
+
+            return packet;
         }
 
 

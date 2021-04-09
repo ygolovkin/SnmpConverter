@@ -30,30 +30,30 @@ namespace Snmp.Serializer
             return new SnmpResult<int>(length);
         }
 
-        internal static byte[] GetLength(int source)
+        internal static SnmpResult<byte[]> GetLength(this int source)
         {
-            byte[] len = BitConverter.GetBytes(source);
-            byte[] buf = Array.Empty<byte>();
+            byte[] length = BitConverter.GetBytes(source);
+            byte[] buffer = Array.Empty<byte>();
 
             for (var i = 3; i >= 0; i--)
             {
-                if (len[i] != 0 || buf.Length > 0)
+                if (length[i] != 0 || buffer.Length > 0)
                 {
-                    buf = buf.Append(len[i]);
+                    buffer = buffer.Append(length[i]);
                 }
             }
 
-            if (buf.Length == 0)
+            if (buffer.Length == 0)
             {
-                buf = buf.Append(0);
+                buffer = buffer.Append(0);
             }
-            if (buf.Length != 1 || (buf[0] & SnmpConstants.FLAG_BYTE) != 0)
+            if (buffer.Length != 1 || (buffer[0] & SnmpConstants.FLAG_BYTE) != 0)
             {
-                var encHeader = (byte)buf.Length;
+                var encHeader = (byte)buffer.Length;
                 encHeader = (byte)(encHeader | SnmpConstants.FLAG_BYTE);
-                buf = buf.Prepend(encHeader);
+                buffer = buffer.Prepend(encHeader);
             }
-            return buf;
+            return new SnmpResult<byte[]>(buffer);
         }
     }
 }
