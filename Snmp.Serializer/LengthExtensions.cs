@@ -8,13 +8,13 @@ namespace Snmp.Serializer
         internal static SnmpResult<int> GetLength(this byte[] source, ref int offset)
         {
             int length;
-            if ((source[offset] & SnmpConstants.SNMP_BIGGEST_BYTE) == 0)
+            if ((source[offset] & SnmpConstants.FLAG_BYTE) == 0)
             {
                 length = source[offset++];
             }
             else
             {
-                length = source[offset++] & ~SnmpConstants.SNMP_BIGGEST_BYTE;
+                length = source[offset++] & ~SnmpConstants.FLAG_BYTE;
                 var value = 0;
                 for (var i = 0; i < length; i++)
                 {
@@ -47,10 +47,10 @@ namespace Snmp.Serializer
             {
                 buf = buf.Append(0);
             }
-            if (buf.Length != 1 || (buf[0] & SnmpConstants.SNMP_BIGGEST_BYTE) != 0)
+            if (buf.Length != 1 || (buf[0] & SnmpConstants.FLAG_BYTE) != 0)
             {
                 var encHeader = (byte)buf.Length;
-                encHeader = (byte)(encHeader | SnmpConstants.SNMP_BIGGEST_BYTE);
+                encHeader = (byte)(encHeader | SnmpConstants.FLAG_BYTE);
                 buf = buf.Prepend(encHeader);
             }
             return buf;

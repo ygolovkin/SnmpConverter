@@ -1,5 +1,6 @@
 ﻿using System;
 using Snmp.Model;
+using Snmp.Model.Enums;
 using Snmp.Model.Exceptions;
 using Snmp.Model.Packet;
 
@@ -14,33 +15,48 @@ namespace Snmp.Serializer
 
         public static SnmpBasePacket Serialize(this byte[] source, int offset)
         {
+            if (source[offset++] != (byte)SnmpValueType.CaptionOid) throw new SnmpException("Incorrect format");
+
+            var lengthResult = source.GetLength(ref offset);
+            lengthResult.HandleError();
+            if (lengthResult.Value < 2) throw new SnmpException("Array too short");
+
+            var versionResult = source.ToVersion(ref offset);
+            versionResult.HandleError();
+
+            return versionResult.Value switch
+            {
+                SnmpVersion.v2c => SerializeV2c(source, offset),
+                _ => throw new SnmpException("Unsupported version")
+            };
+        }
+
+        private static SnmpPacketV2C SerializeV2c(this byte[] source, int offset)
+        {
 
         }
+
 
         public static SnmpResult<byte[]> Serialize(this SnmpBasePacket packet)
         {
-            var result = packet.IsCorrect();
+            var result = packet.IsPacketCorrect();
+            result.HandleError();
 
-            if (result)
+            return packet switch
             {
-                return packet switch
-                {
-                    SnmpPacketV2C v2c => v2c.Serialize(),
-                    _ => throw new SnmpException("Incorrect packet format")
-                };
-            }
-
-            throw new SnmpException(result.Error);
+                SnmpPacketV2C v2c => v2c.SerializeV2c(),
+                _ => throw new SnmpException("Unsupported version")
+            };
         }
         
-        private static SnmpResult<byte[]> Serialize(this SnmpPacketV2C packet)
+        private static SnmpResult<byte[]> SerializeV2c(this SnmpPacketV2C packet)
         {
             throw new NotImplementedException();
         }
 
 
 
-        private static SnmpResult<bool> IsCorrect(this SnmpBasePacket packet)
+        private static SnmpResult<bool> IsPacketCorrect(this SnmpBasePacket packet)
         {
             if (packet is null)
             {

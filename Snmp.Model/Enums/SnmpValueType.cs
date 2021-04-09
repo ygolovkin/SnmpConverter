@@ -8,6 +8,7 @@
         Bits = 0x04,
         Null = 0x05,
         Object_Identifier = 0x06,
+        CaptionOid = 0x30,
         IpAddress = 0x40,
         Counter = 0x41,
         Counter32 = 0x41,

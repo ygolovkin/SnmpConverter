@@ -1,4 +1,6 @@
-﻿namespace Snmp.Model
+﻿using Snmp.Model.Exceptions;
+
+namespace Snmp.Model
 {
     public class SnmpResult<T>
     {
@@ -9,6 +11,8 @@
         public string Error => _error ?? string.Empty;
 
         public bool HasValue => _error is null;
+
+        public bool HasError => !HasValue;
 
         public SnmpResult(T value)
         {
@@ -23,6 +27,11 @@
         public static implicit operator bool(SnmpResult<T> result)
         {
             return result.HasValue;
+        }
+
+        public void HandleError()
+        {
+            if(HasError) throw new SnmpException(Error);
         }
     }
 }
