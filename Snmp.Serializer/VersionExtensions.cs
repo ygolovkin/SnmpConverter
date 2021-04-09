@@ -12,8 +12,9 @@ namespace Snmp.Serializer
     {
         internal static SnmpResult<SnmpVersion> ToVersion(this byte[] source, ref int offset)
         {
-            var intResult = source.ToInt(ref offset);
+            var intResult = source.GetInt(ref offset);
             if(intResult.HasError) return new SnmpResult<SnmpVersion>(intResult.Error);
+            if (intResult.Value < 0 || intResult.Value > 2) return new SnmpResult<SnmpVersion>("Incorrect value of version");
 
             return (byte) intResult.Value switch
             {
@@ -22,9 +23,10 @@ namespace Snmp.Serializer
             };
         }
 
-        internal static SnmpResult<byte[]> ToByteArray(this SnmpVersion version)
+        internal static SnmpResult<byte[]> ToByteArray(this SnmpVersion source)
         {
-            return ((int) version).ToByteArray();
+            var intResult = ((int) source).ToByteArray();
+            return intResult.HasError ? new SnmpResult<byte[]>(intResult.Error) : intResult;
         }
     }
 }

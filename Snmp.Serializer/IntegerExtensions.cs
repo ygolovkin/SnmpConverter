@@ -9,68 +9,70 @@ namespace Snmp.Serializer
     {
         internal static SnmpResult<byte[]> ToByteArray(this int source)
         {
-            var bytes = BitConverter.GetBytes(source);
+            byte[] bytes = BitConverter.GetBytes(source);
 
-            var buffer = Array.Empty<byte>();
-
+            byte[] tmp = Array.Empty<byte>();
             if (source < 0)
             {
                 for (var i = 3; i >= 0; i--)
                 {
-                    if (buffer.Any() || bytes[i] != SnmpConstants.HIGHEST_BYTE)
+                    if (tmp.Length > 0 || bytes[i] != 0xff)
                     {
-                        buffer = buffer.Append(bytes[i]).ToArray();
+                        tmp = tmp.Append(bytes[i]);
                     }
                 }
 
-                if (!buffer.Any())
+                if (tmp.Length == 0)
                 {
-                    buffer = buffer.Append(SnmpConstants.HIGHEST_BYTE).ToArray();
+                    tmp = tmp.Append(0xff);
                 }
 
-                if ((buffer.First() & SnmpConstants.FLAG_BYTE) == 0)
+                if ((tmp[0] & 0x80) == 0)
                 {
-                    buffer = buffer.Prepend(SnmpConstants.HIGHEST_BYTE).ToArray();
+                    tmp = tmp.Prepend(0xff);
                 }
             }
             else if (source == 0)
             {
-                buffer = buffer.Append(SnmpConstants.LOWEST_BYTE).ToArray();
+                tmp = tmp.Append(0);
             }
             else
             {
                 for (var i = 3; i >= 0; i--)
                 {
-                    if (bytes[i] != SnmpConstants.LOWEST_BYTE || buffer.Any())
+                    if (bytes[i] != 0 || tmp.Length > 0)
                     {
-                        buffer = buffer.Append(bytes[i]).ToArray();
+                        tmp = tmp.Append(bytes[i]);
                     }
                 }
 
-                if (buffer.Any())
+                if (tmp.Length == 0)
                 {
-                    if ((buffer.First() & SnmpConstants.FLAG_BYTE) != 0)
-                    {
-                        buffer = buffer.Prepend(SnmpConstants.LOWEST_BYTE).ToArray();
-                    }
+                    tmp = tmp.Append(0);
                 }
-                else
+                else if ((tmp[0] & 0x80) != 0)
                 {
-                    buffer = buffer.Append(SnmpConstants.LOWEST_BYTE).ToArray();
+                    tmp = tmp.Prepend(0);
                 }
             }
 
-            if (buffer.Length > 1 && 
-                buffer.First() == SnmpConstants.HIGHEST_BYTE &&
-                (buffer[1] & SnmpConstants.FLAG_BYTE) != 0)
+            if (tmp.Length > 1 && tmp[0] == 0xff && (tmp[1] & 0x80) != 0)
             {
-                buffer = buffer.Prepend(SnmpConstants.LOWEST_BYTE).ToArray();
+                tmp = tmp.Prepend(0);
             }
 
-            return new SnmpResult<byte[]>(buffer);
+            var lengthResult = tmp.Length.GetLength();
+            if(lengthResult.HasError) return new SnmpResult<byte[]>(lengthResult.Error);
+
+            var result = new[] { (byte)SnmpValueType.OctetString }
+                .Concat(lengthResult.Value)
+                .Concat(tmp)
+                .ToArray();
+
+            return new SnmpResult<byte[]>(result);
         }
 
-        internal static SnmpResult<int> ToInt(this byte[] source, ref int offset)
+        internal static SnmpResult<int> GetInt(this byte[] source, ref int offset)
         {
             if (source[offset++] != (byte)SnmpValueType.Integer) return new SnmpResult<int>("Incorrect type of integer");
 

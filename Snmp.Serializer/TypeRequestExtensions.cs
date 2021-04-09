@@ -5,17 +5,17 @@ namespace Snmp.Serializer
 {
     internal static class TypeRequestExtensions
     {
-        internal static SnmpResult<SnmpTypeRequest> ToTypeRequest(this byte[] buffer, ref int offset)
+        internal static SnmpResult<SnmpTypeRequest> GetTypeRequest(this byte[] source, ref int offset)
         {
-            var typeRequest = buffer[offset++];
+            var typeRequest = source[offset++];
             if(typeRequest < 0 || typeRequest > 6) return new SnmpResult<SnmpTypeRequest>("Incorrect value of type request");
             
             return new SnmpResult<SnmpTypeRequest>((SnmpTypeRequest)typeRequest);
         }
 
-        internal static SnmpResult<byte[]> ToByteArray(this SnmpTypeRequest typeRequest)
+        internal static SnmpResult<byte[]> ToByteArray(this SnmpTypeRequest source)
         {
-            return new SnmpResult<byte[]>(new[] {(byte) typeRequest});
+            return new SnmpResult<byte[]>(new[] {(byte) source});
         }
     }
 }

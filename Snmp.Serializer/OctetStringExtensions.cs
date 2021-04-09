@@ -10,7 +10,7 @@ namespace Snmp.Serializer
 {
     internal static class OctetStringExtensions
     {
-        internal static SnmpResult<string> ToString(this byte[] source, ref int offset)
+        internal static SnmpResult<string> GetString(this byte[] source, ref int offset)
         {
             if (source[offset++] != (byte)SnmpValueType.OctetString) return new SnmpResult<string>(error:"Incorrect type of octet string");
 

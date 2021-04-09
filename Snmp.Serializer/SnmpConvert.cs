@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 using Snmp.Model;
 using Snmp.Model.Enums;
 using Snmp.Model.Exceptions;
@@ -36,24 +35,32 @@ namespace Snmp.Serializer
         {
             var packet = new SnmpPacketV2C();
 
-            var communityResult = source.ToString(ref offset);
+            var communityResult = source.GetString(ref offset);
             communityResult.HandleError();
             packet.Community = communityResult.Value;
 
-            var typeRequestResult = source.ToTypeRequest(ref offset);
+            var typeRequestResult = source.GetTypeRequest(ref offset);
             typeRequestResult.HandleError();
             packet.TypeRequest = typeRequestResult.Value;
 
             var lengthResult = source.GetLength(ref offset);
             lengthResult.HandleError();
 
-            //request id
+            var requestIdResult = source.GetInt(ref offset);
+            requestIdResult.HandleError();
+            packet.RequestId = requestIdResult.Value;
 
-            //error status
+            var errorStatusResult = source.GetErrorStatus(ref offset);
+            errorStatusResult.HandleError();
+            packet.ErrorStatus = errorStatusResult.Value;
 
-            //error index
+            var errorIndexResult = source.GetInt(ref offset);
+            errorIndexResult.HandleError();
+            packet.ErrorIndex = errorIndexResult.Value;
 
-            //variable bindings
+            var variableBindingsResult = source.GetVariableBinidings(ref offset);
+            variableBindingsResult.HandleError();
+            packet.VariableBinidings = variableBindingsResult.Value;
 
             return packet;
         }
