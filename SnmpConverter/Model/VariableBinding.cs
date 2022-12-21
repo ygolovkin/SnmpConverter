@@ -1,8 +1,6 @@
-﻿using Snmp.Model.Enums;
-
-namespace Snmp.Model.Packet
+﻿namespace SnmpConverter
 {
-    public class VariableBiniding
+    public class VariableBinding
     {
         public Oid? Oid { get; set; }
 

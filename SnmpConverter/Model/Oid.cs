@@ -2,38 +2,37 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using Snmp.Model.Exceptions;
 
-namespace Snmp.Model.Packet
+namespace SnmpConverter
 {
     public class Oid : IEnumerable<uint>, IEquatable<Oid>
     {
-        private uint[] values;
+        private uint[] _values;
         
         public Oid()
         {
-            values = Array.Empty<uint>();
+            _values = Array.Empty<uint>();
         }
 
         public Oid(uint value)
         {
-            values = new []{ value };
+            _values = new []{ value };
         }
 
-        public Oid(IEnumerable<uint> value)
+        public Oid(IEnumerable<uint>? value)
         {
-            values = value?.ToArray() ?? Array.Empty<uint>();
+            _values = value?.ToArray() ?? Array.Empty<uint>();
         }
 
-        public Oid(string value)
+        public Oid(string? value)
         {
             try
             {
-                values = string.IsNullOrEmpty(value)
+                _values = string.IsNullOrEmpty(value)
                 ? Array.Empty<uint>()
                 : value
                     .Split(".", StringSplitOptions.RemoveEmptyEntries)
-                    .Select(str => Convert.ToUInt32(str))
+                    .Cast<uint>()
                     .ToArray();
             }
             catch (Exception ex)
@@ -47,25 +46,27 @@ namespace Snmp.Model.Packet
             AddRange(new[] {value});
         }
 
-        public void AddRange(IEnumerable<uint> value)
+        public void AddRange(IEnumerable<uint>? value)
         {
-            if(value != null && value.Any()) 
-                values = values.Concat(value).ToArray();
+            if (value != null && value.Any())
+            {
+                _values = _values.Concat(value).ToArray();
+            }
         }
 
         public uint[] ToArray()
         {
-            return values;
+            return _values;
         }
 
         public override string ToString()
         {
-            return string.Join('.', values);
+            return string.Join('.', _values);
         }
 
         public IEnumerator<uint> GetEnumerator()
         {
-            return (IEnumerator<uint>)values.GetEnumerator();
+            return (IEnumerator<uint>)_values.GetEnumerator();
         }
 
         IEnumerator IEnumerable.GetEnumerator()
@@ -79,9 +80,9 @@ namespace Snmp.Model.Packet
             if (ReferenceEquals(this, other)) return true;
 
             var otherValues = other.ToArray();
-            if (values.Length != otherValues.Length) return false;
+            if (_values.Length != otherValues.Length) return false;
             
-            return !values.Where((t, i) => t != otherValues[i]).Any();
+            return !_values.Where((item, index) => item != otherValues[index]).Any();
         }
 
         public override bool Equals(object? obj)
@@ -94,7 +95,7 @@ namespace Snmp.Model.Packet
 
         public override int GetHashCode()
         {
-            return values.GetHashCode();
+            return _values.GetHashCode();
         }
     }
 }

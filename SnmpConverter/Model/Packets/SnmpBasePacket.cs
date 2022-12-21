@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
-using Snmp.Model.Enums;
 
-namespace Snmp.Model.Packet
+namespace SnmpConverter
 {
     public abstract class SnmpBasePacket
     {
@@ -15,11 +14,11 @@ namespace Snmp.Model.Packet
 
         public int ErrorIndex { get; set; }
 
-        public ICollection<VariableBiniding> VariableBinidings { get; set; }
+        public ICollection<VariableBinding> VariableBindings { get; set; }
 
         protected SnmpBasePacket()
         {
-            VariableBinidings = new List<VariableBiniding>();
+            VariableBindings = new List<VariableBinding>();
         }
     }
 }

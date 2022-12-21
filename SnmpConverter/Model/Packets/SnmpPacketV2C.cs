@@ -1,6 +1,4 @@
-﻿using Snmp.Model.Enums;
-
-namespace Snmp.Model.Packet
+﻿namespace SnmpConverter
 {
     public class SnmpPacketV2C : SnmpBasePacket
     {
@@ -8,7 +6,7 @@ namespace Snmp.Model.Packet
 
         public SnmpPacketV2C() : base()
         {
-            Version = SnmpVersion.v2c;
+            Version = SnmpVersion.V2C;
         }
     }
 }
