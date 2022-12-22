@@ -2,7 +2,7 @@
 
 public enum SnmpErrorStatus : byte
 {
-    NoError,
+    NoError = 0,
     TooBig,
     NoSuchName,
     BadValue,

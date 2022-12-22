@@ -4,7 +4,7 @@ internal static class VariableBindingExtensions
 {
     internal static SnmpResult<VariableBinding> ToVariableBinding(this byte[] source, ref int offset)
     {
-        var unwrapResult = source.UnwrapWithLength(ref offset, SnmpValueType.ObjectIdentifier);
+        var unwrapResult = source.ToLength(ref offset, SnmpValueType.ObjectIdentifier);
         if (unwrapResult.HasError)
         {
             return new SnmpResult<VariableBinding>(unwrapResult.Error);

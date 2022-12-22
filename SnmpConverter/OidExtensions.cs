@@ -6,7 +6,7 @@ internal static class OidExtensions
 {
     internal static SnmpResult<Oid> GetOid(this byte[] source, ref int offset)
     {
-        var unwrapResult = source.UnwrapWithLength(ref offset, SnmpValueType.ObjectIdentifier);
+        var unwrapResult = source.ToLength(ref offset, SnmpValueType.ObjectIdentifier);
         if (unwrapResult.HasError)
         {
             return new SnmpResult<Oid>(unwrapResult.Error);
@@ -81,7 +81,7 @@ internal static class OidExtensions
             bytes = bytes.Append(EncodeInstance(array[i]));
         }
 
-        return bytes.WrapWithLength(SnmpValueType.ObjectIdentifier);
+        return bytes.ToLength(SnmpValueType.ObjectIdentifier);
     }
 
     private static byte[] EncodeInstance(uint number)

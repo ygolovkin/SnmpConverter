@@ -54,11 +54,9 @@ public static class SnmpConvert
             throw new SnmpException("Incorrect format");
         }
 
-        var lengthResult = buffer.GetLength(ref offset);
-        lengthResult.HandleError(len => len < 2, "Array too short");
+        buffer.ToLength(ref offset, new SnmpHandlerError<int>(len => len < 2, "Array too short"));
 
         var versionResult = buffer.ToVersion(ref offset);
-        versionResult.HandleError();
 
         return versionResult.Value switch
         {
@@ -70,22 +68,16 @@ public static class SnmpConvert
     private static SnmpPacketV2C SerializeV2c(this byte[] source, int offset)
     {
         var communityResult = source.ToString(ref offset);
-        communityResult.HandleError();
 
         var typeRequestResult = source.GetTypeRequest(ref offset);
-        typeRequestResult.HandleError();
 
-        var lengthResult = source.GetLength(ref offset);
-        lengthResult.HandleError();
+        source.ToLength(ref offset);
 
-        var requestIdResult = source.ToInt32(ref offset);
-        requestIdResult.HandleError();
+        var requestIdResult = source.ToRequestId(ref offset);
 
         var errorStatusResult = source.ToErrorStatus(ref offset);
-        errorStatusResult.HandleError();
 
-        var errorIndexResult = source.ToInt32(ref offset);
-        errorIndexResult.HandleError();
+        var errorIndexResult = source.ToErrorIndex(ref offset);
 
         var variableBindingsResult = source.ToVariableBindings(ref offset);
         variableBindingsResult.HandleError();

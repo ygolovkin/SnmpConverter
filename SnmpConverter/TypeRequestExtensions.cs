@@ -1,16 +1,15 @@
-﻿namespace SnmpConverter;
+﻿using System;
+using System.Linq;
+
+namespace SnmpConverter;
 
 internal static class TypeRequestExtensions
 {
     internal static SnmpResult<SnmpTypeRequest> GetTypeRequest(this byte[] source, ref int offset)
     {
-        var typeRequest = source[offset++];
-        if (typeRequest is < 0 or > 6)
-        {
-            return new SnmpResult<SnmpTypeRequest>("Incorrect value of type request");
-        }
-            
-        return new SnmpResult<SnmpTypeRequest>((SnmpTypeRequest)typeRequest);
+        var result = source.ToEnum<SnmpTypeRequest>(ref offset);
+        result.HandleError();
+        return result;
     }
 
     internal static SnmpResult<byte[]> ToByteArray(this SnmpTypeRequest source)

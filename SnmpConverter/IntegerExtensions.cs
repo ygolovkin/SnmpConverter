@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 
 namespace SnmpConverter;
 
@@ -59,18 +58,14 @@ internal static class IntegerExtensions
             buffer = buffer.Prepend(0);
         }
 
-        var lengthResult = buffer.Length.GetLength();
-        if (lengthResult.HasError)
-        {
-            return new SnmpResult<byte[]>(lengthResult.Error);
-        }
+        buffer.Length.ToLength();
 
-        return buffer.WrapWithLength(SnmpValueType.Integer);
+        return buffer.ToLength(SnmpValueType.Integer);
     }
 
     internal static SnmpResult<int> ToInt32(this byte[] source, ref int offset)
     {
-        var unwrapResult = source.UnwrapWithLength(ref offset, SnmpValueType.Integer);
+        var unwrapResult = source.ToLength(ref offset, SnmpValueType.Integer);
         if (unwrapResult.HasError)
         {
             return unwrapResult;
