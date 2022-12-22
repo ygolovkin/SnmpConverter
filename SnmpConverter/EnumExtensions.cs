@@ -12,4 +12,11 @@ internal static class EnumExtensions
             ? new SnmpResult<T>((T)Convert.ChangeType(value, typeof(T)))
             : new SnmpResult<T>($"Incorrect value of {nameof(T)}");
     }
+
+    internal static SnmpResult<T> ToEnum<T>(this int value) where T : Enum
+    {
+        return Enum.GetValues(typeof(T)).Cast<int>().Contains(value)
+            ? new SnmpResult<T>((T)Convert.ChangeType(value, typeof(T)))
+            : new SnmpResult<T>($"Incorrect value of {nameof(T)}");
+    }
 }

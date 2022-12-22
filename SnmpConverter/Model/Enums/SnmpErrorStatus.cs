@@ -1,8 +1,18 @@
 ﻿namespace SnmpConverter;
 
+/// <summary>
+/// SNMP Error status
+/// </summary>
 public enum SnmpErrorStatus : byte
 {
-    NoError = 0,
+    /// <summary>
+    /// No error
+    /// </summary>
+    NoError = 0x00,
+
+    /// <summary>
+    /// Too big request
+    /// </summary>
     TooBig,
     NoSuchName,
     BadValue,

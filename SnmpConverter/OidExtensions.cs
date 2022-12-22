@@ -4,15 +4,11 @@ namespace SnmpConverter;
 
 internal static class OidExtensions
 {
-    internal static SnmpResult<Oid> GetOid(this byte[] source, ref int offset)
+    internal static SnmpResult<Oid> ToOid(this byte[] source, ref int offset)
     {
-        var unwrapResult = source.ToLength(ref offset, SnmpValueType.ObjectIdentifier);
-        if (unwrapResult.HasError)
-        {
-            return new SnmpResult<Oid>(unwrapResult.Error);
-        }
-            
-        var length = unwrapResult.Value;
+        var length = source.ToLength(ref offset, SnmpValueType.ObjectIdentifier, x => x < 0,
+            "Incorrect Oid's length.").Value;
+
         uint first = source[offset++];
 
         var oid = new Oid { first };

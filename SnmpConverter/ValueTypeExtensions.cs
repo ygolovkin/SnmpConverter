@@ -5,7 +5,7 @@ namespace SnmpConverter;
 
 internal static class ValueTypeExtensions
 {
-    internal static SnmpResult<SnmpValueType> GetValueType(this byte[] source, ref int offset)
+    internal static SnmpResult<SnmpValueType> ToValueType(this byte[] source, ref int offset)
     {
         var valueType = source[offset++];
         return !Enum.GetValues(typeof(SnmpValueType)).Cast<byte>().Contains(valueType) 

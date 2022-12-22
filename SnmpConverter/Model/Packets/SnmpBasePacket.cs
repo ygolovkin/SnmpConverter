@@ -6,7 +6,7 @@ namespace SnmpConverter
     {
         public SnmpVersion Version { get; protected set; }
 
-        public SnmpTypeRequest TypeRequest { get; set; }
+        public SnmpPduType PduType { get; set; }
 
         public int RequestId { get; set; }
 

@@ -32,13 +32,13 @@ namespace SnmpConverter
             }
         }
 
-        internal void HandleError(SnmpHandlerError<T>? handlerError)
+        internal void HandleError(Func<T, bool>? predicate, string message)
         {
             HandleError();
 
-            if (handlerError is { Predicate: { } } && handlerError.Predicate(Value))
+            if (predicate is not null && predicate(Value))
             {
-                throw new SnmpException(handlerError.Message);
+                throw new SnmpException(message);
             }
         }
     }

@@ -5,10 +5,17 @@ namespace SnmpConverter;
 
 internal static class LengthExtensions
 {
-    internal static SnmpResult<int> ToLength(this byte[] source, ref int offset, SnmpHandlerError<int>? handlerError = null)
+    internal static SnmpResult<int> ToLength(this byte[] source, ref int offset, Func<int, bool>? predicate, string message)
     {
         var result = source.GetLength(ref offset);
-        result.HandleError(handlerError);
+        result.HandleError(predicate, message);
+        return result;
+    }
+
+    internal static SnmpResult<int> ToLength(this byte[] source, ref int offset)
+    {
+        var result = source.GetLength(ref offset);
+        result.HandleError();
         return result;
     }
 
@@ -35,14 +42,17 @@ internal static class LengthExtensions
         return new SnmpResult<byte[]>(result);
     }
 
-    internal static SnmpResult<int> ToLength(this byte[] source, ref int offset, SnmpValueType valueType)
+    internal static SnmpResult<int> ToLength(this byte[] source, ref int offset, SnmpValueType valueType,
+        Func<int, bool>? predicate, string message)
     {
         if (source[offset++] != (byte)valueType)
         {
             return new SnmpResult<int>($"Incorrect type of {valueType}");
         }
-            
-        return source.ToLength(ref offset);
+
+        var length = source.ToLength(ref offset);
+        length.HandleError(predicate, message);
+        return length;
     }
 
     private static SnmpResult<int> GetLength(this byte[] source, ref int offset)

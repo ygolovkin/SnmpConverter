@@ -6,14 +6,14 @@ internal static class VariableBindingsExtensions
 {
     internal static SnmpResult<ICollection<VariableBinding>> ToVariableBindings(this byte[] source, ref int offset)
     {
-        source.ToLength(ref offset, SnmpValueType.ObjectIdentifier);
+        source.ToLength(ref offset, SnmpValueType.CaptionOid, x => x < 0, "Incorrect variable bindings's length.");
 
         var variableBindings = new List<VariableBinding>();
         while (offset != source.Length)
         {
             if (offset > source.Length)
             {
-                return new SnmpResult<ICollection<VariableBinding>>("Incorrect packet format");
+                return new SnmpResult<ICollection<VariableBinding>>("Incorrect variable bindings format");
             }
 
             var variableBindingResult = source.ToVariableBinding(ref offset);

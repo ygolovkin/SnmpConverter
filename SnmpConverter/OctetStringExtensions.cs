@@ -7,11 +7,12 @@ internal static class OctetStringExtensions
 {
     internal static SnmpResult<string> ToString(this byte[] source, ref int offset)
     {
-        var unwrapResult = source.ToLength(ref offset, SnmpValueType.OctetString);
+        var length = source.ToLength(ref offset, SnmpValueType.OctetString, x => x < 0,
+            "Incorrect octet string's length.");
 
-        var octetString = new byte[unwrapResult.Value];
-        Buffer.BlockCopy(source, offset, octetString, 0, unwrapResult.Value);
-        offset += unwrapResult.Value;
+        var octetString = new byte[length.Value];
+        Buffer.BlockCopy(source, offset, octetString, 0, length.Value);
+        offset += length.Value;
         return new SnmpResult<string>(value: Encoding.UTF8.GetString(octetString));
     }
 

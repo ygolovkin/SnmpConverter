@@ -65,18 +65,7 @@ internal static class IntegerExtensions
 
     internal static SnmpResult<int> ToInt32(this byte[] source, ref int offset)
     {
-        var unwrapResult = source.ToLength(ref offset, SnmpValueType.Integer);
-        if (unwrapResult.HasError)
-        {
-            return unwrapResult;
-        }
-
-        if (unwrapResult.Value > 5)
-        {
-            return new SnmpResult<int>("Incorrect integer length");
-        }
-
-        var length = unwrapResult.Value;
+        var length = source.ToLength(ref offset, SnmpValueType.Integer, x => x is < 0 or > 5, "Incorrect Int32 length").Value;
 
         var isNegative = (source[offset] & Constants.HighByte) != 0;
 
