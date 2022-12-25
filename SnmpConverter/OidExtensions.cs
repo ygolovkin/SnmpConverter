@@ -61,11 +61,11 @@ internal static class OidExtensions
         return new SnmpResult<Oid>(oid);
     }
 
-    internal static SnmpResult<byte[]> ToByteArray(this Oid? source)
+    internal static SnmpResult<byte[]> ToByteArray(this Oid oid)
     {
-        var array = source?.ToArray();
+        var array = oid.ToArray();
         var bytes = Array.Empty<byte>();
-        if (array is null || array.Length < 2)
+        if (array.Length < 2)
         {
             array = new uint[2];
             array[0] = array[1] = 0;

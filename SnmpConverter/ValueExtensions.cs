@@ -14,4 +14,9 @@ internal static class ValueExtensions
 
         return new SnmpResult<byte[]>(value);
     }
+
+    internal static SnmpResult<byte[]> ToByteArray(this byte[] value)
+    {
+        return value.ToLength();
+    }
 }

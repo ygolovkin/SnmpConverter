@@ -12,4 +12,9 @@ internal static class ValueTypeExtensions
             ? new SnmpResult<SnmpValueType>("Incorrect value of value type") 
             : new SnmpResult<SnmpValueType>((SnmpValueType)valueType);
     }
+
+    internal static SnmpResult<byte[]> ToByteArray(this SnmpValueType valueType)
+    {
+        return new SnmpResult<byte[]>(new[] { (byte)valueType });
+    }
 }

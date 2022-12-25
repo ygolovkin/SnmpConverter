@@ -6,7 +6,7 @@ internal static class VariableBindingsExtensions
 {
     internal static SnmpResult<ICollection<VariableBinding>> ToVariableBindings(this byte[] source, ref int offset)
     {
-        source.ToLength(ref offset, SnmpValueType.CaptionOid, x => x < 0, "Incorrect variable bindings's length.");
+        source.ToLength(ref offset, SnmpValueType.CaptionOid, x => x < 0, "Incorrect variable bindings length.");
 
         var variableBindings = new List<VariableBinding>();
         while (offset != source.Length)
@@ -25,5 +25,23 @@ internal static class VariableBindingsExtensions
         }
 
         return new SnmpResult<ICollection<VariableBinding>>(variableBindings);
+    }
+
+    internal static SnmpResult<byte[]> ToByteArray(this ICollection<VariableBinding>? variableBindings)
+    {
+        if (variableBindings is null)
+        {
+            return new SnmpResult<byte[]>("Incorrect format of variable bindings.");
+        }
+
+        var result = new List<byte>();
+        foreach (var variableBinding in variableBindings)
+        {
+            var variableBindingValue = variableBinding.ToByteArray();
+            variableBindingValue.HandleError();
+            result.AddRange(variableBindingValue.Value);
+        }
+
+        return result.ToArray().ToLength(SnmpValueType.CaptionOid);
     }
 }

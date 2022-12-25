@@ -4,7 +4,7 @@ namespace SnmpConverter
 {
     internal class SnmpResult<T>
     {
-        private string? _error;
+        private readonly string? _error;
 
         internal T Value { get; } = default!;
 

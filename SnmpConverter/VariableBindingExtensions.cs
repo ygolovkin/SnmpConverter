@@ -1,4 +1,7 @@
-﻿namespace SnmpConverter;
+﻿using System;
+using System.Linq;
+
+namespace SnmpConverter;
 
 internal static class VariableBindingExtensions
 {
@@ -21,5 +24,26 @@ internal static class VariableBindingExtensions
             Value = valueResult.Value
         };
         return new SnmpResult<VariableBinding>(variableBinding);
+    }
+
+    internal static SnmpResult<byte[]> ToByteArray(this VariableBinding? variableBinding)
+    {
+        if (variableBinding?.Oid is null)
+        {
+            return new SnmpResult<byte[]>("Incorrect format of variable binding.");
+        }
+
+        var oidResult = variableBinding.Oid.ToByteArray();
+        oidResult.HandleError();
+
+        var typeResult = variableBinding.Type.ToByteArray();
+        typeResult.HandleError();
+
+        var valueResult = variableBinding.Value is null
+            ? Array.Empty<byte>().ToByteArray()
+            : variableBinding.Value.ToByteArray();
+        valueResult.HandleError();
+
+        return new SnmpResult<byte[]>(oidResult.Value.Concat(typeResult.Value).Concat(valueResult.Value).ToArray());
     }
 }
