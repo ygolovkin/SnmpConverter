@@ -5,26 +5,26 @@ using System.Linq;
 
 namespace SnmpConverter
 {
-    public class Oid : IEnumerable<uint>, IEquatable<Oid>
+    public class SnmpOid : IEnumerable<uint>, IEquatable<SnmpOid>
     {
         private uint[] _values;
         
-        public Oid()
+        public SnmpOid()
         {
             _values = Array.Empty<uint>();
         }
 
-        public Oid(uint value)
+        public SnmpOid(uint value)
         {
             _values = new []{ value };
         }
 
-        public Oid(IEnumerable<uint>? value)
+        public SnmpOid(IEnumerable<uint>? value)
         {
             _values = value?.ToArray() ?? Array.Empty<uint>();
         }
 
-        public Oid(string? value)
+        public SnmpOid(string? value)
         {
             try
             {
@@ -74,7 +74,7 @@ namespace SnmpConverter
             return GetEnumerator();
         }
 
-        public bool Equals(Oid? other)
+        public bool Equals(SnmpOid? other)
         {
             if (other is null) return false;
             if (ReferenceEquals(this, other)) return true;
@@ -90,7 +90,7 @@ namespace SnmpConverter
             if (obj is null) return false;
             if (ReferenceEquals(this, obj)) return true;
 
-            return obj.GetType() == GetType() && Equals((Oid) obj);
+            return obj.GetType() == GetType() && Equals((SnmpOid) obj);
         }
 
         public override int GetHashCode()

@@ -41,7 +41,7 @@ public static class SnmpConvert
             throw new SnmpException("Incorrect format", new ArgumentException(null, nameof(offset)));
         }
 
-        if (length < Constants.MinBufferSize || length > source.Length - offset)
+        if (length < SnmpConstants.MinBufferSize || length > source.Length - offset)
         {
             throw new SnmpException("Incorrect format", new ArgumentException(null, nameof(length)));
         }

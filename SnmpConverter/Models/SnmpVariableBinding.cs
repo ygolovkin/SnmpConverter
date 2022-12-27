@@ -1,8 +1,8 @@
 ﻿namespace SnmpConverter
 {
-    public class VariableBinding
+    public class SnmpVariableBinding
     {
-        public Oid? Oid { get; set; }
+        public SnmpOid? Oid { get; set; }
 
         public SnmpValueType Type { get; set; }
 

@@ -14,11 +14,11 @@ namespace SnmpConverter
 
         public int ErrorIndex { get; set; }
 
-        public ICollection<VariableBinding> VariableBindings { get; set; }
+        public ICollection<SnmpVariableBinding> VariableBindings { get; set; }
 
         protected SnmpBasePacket()
         {
-            VariableBindings = new List<VariableBinding>();
+            VariableBindings = new List<SnmpVariableBinding>();
         }
     }
 }

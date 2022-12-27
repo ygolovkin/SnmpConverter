@@ -8,7 +8,7 @@ internal static class SnmpV2cConverter
     {
         var communityResult = source.ToString(ref offset);
 
-        var typeRequestResult = source.ToPduType(ref offset);
+        var pduTypeResult = source.ToPduType(ref offset);
 
         source.ToLength(ref offset, x => x < 0, "Array too short.");
 
@@ -25,7 +25,7 @@ internal static class SnmpV2cConverter
         var packet = new SnmpPacketV2C
         {
             Community = communityResult.Value,
-            PduType = typeRequestResult.Value,
+            PduType = pduTypeResult.Value,
             RequestId = requestIdResult.Value,
             ErrorStatus = errorStatusResult.Value,
             ErrorIndex = errorIndexResult.Value,

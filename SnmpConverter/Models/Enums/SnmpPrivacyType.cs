@@ -3,9 +3,9 @@
 public enum SnmpPrivacyType
 {
     None,
-    DES,
-    TripleDES,
-    AES128,
-    AES192,
-    AES256
+    Des,
+    TripleDes,
+    Aes128,
+    Aes192,
+    Aes256
 }

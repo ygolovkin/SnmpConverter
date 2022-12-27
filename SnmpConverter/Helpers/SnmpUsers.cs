@@ -6,7 +6,22 @@ namespace SnmpConverter;
 
 public static class SnmpUsers
 {
-    private static readonly List<SnmpUser> _users = new();
+    private static readonly List<SnmpUser> _users = new()
+    {
+        new SnmpUser
+        {
+            Username = string.Empty,
+            AuthenticationType = SnmpAuthenticationType.None,
+            PrivacyType = SnmpPrivacyType.None,
+            Password = string.Empty,
+            Key = string.Empty,
+            HashPassword = Array.Empty<byte>(),
+            HashKey = Array.Empty<byte>(),
+            EngineId = new SnmpEngineId(),
+            ContextEngineId = new SnmpEngineId(),
+            ContextName = string.Empty
+        }
+    };
 
     public static void Add(SnmpUser user)
     {
@@ -33,15 +48,15 @@ public static class SnmpUsers
         _users.AddRange(users);
     }
 
-    internal static SnmpResult<bool> IsUserExist(this SnmpUser user)
+    internal static SnmpResult<SnmpUser> Get(string username)
     {
-        var snmpUser = _users.FirstOrDefault(u => u.Username == user.Username);
+        var snmpUser = _users.FirstOrDefault(u => u.Username == username);
         if (snmpUser is null)
         {
-            return new SnmpResult<bool>($"User {user.Username} doesn't exist.");
+            return new SnmpResult<SnmpUser>($"User {username} doesn't exist.");
         }
 
-        return new SnmpResult<bool>(true);
+        return new SnmpResult<SnmpUser>(snmpUser);
     }
 
     private static void CheckUser(SnmpUser user)

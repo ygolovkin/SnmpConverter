@@ -4,7 +4,7 @@ using System.Text;
 
 namespace SnmpConverter;
 
-internal static class SnmpCrypting
+internal static class HashExtensions
 {
     internal static void HashPassword(this SnmpUser user)
     {
@@ -30,11 +30,30 @@ internal static class SnmpCrypting
 
         user.HashKey = user.PrivacyType switch
         {
-            SnmpPrivacyType.TripleDES => hashKey.ExtendShortKey3DES(engineId, user.AuthenticationType),
-            SnmpPrivacyType.AES192 => hashKey.ExtendShortKeyAES(engineId, user.AuthenticationType, user.PrivacyType),
-            SnmpPrivacyType.AES256 => hashKey.ExtendShortKeyAES(engineId, user.AuthenticationType, user.PrivacyType),
+            SnmpPrivacyType.TripleDes => hashKey.ExtendShortKey3DES(engineId, user.AuthenticationType),
+            SnmpPrivacyType.Aes192 => hashKey.ExtendShortKeyAES(engineId, user.AuthenticationType, user.PrivacyType),
+            SnmpPrivacyType.Aes256 => hashKey.ExtendShortKeyAES(engineId, user.AuthenticationType, user.PrivacyType),
             _ => hashKey
         };
+    }
+
+    internal static byte[] GetHash(this byte[] buffer, SnmpUser? user)
+    {
+        if (user is null || user.AuthenticationType == SnmpAuthenticationType.None)
+        {
+            return buffer;
+        }
+
+        HMAC hmac = user.AuthenticationType == SnmpAuthenticationType.MD5
+            ? new HMACMD5(user.HashPassword)
+            : new HMACSHA1(user.HashPassword);
+        var result = new byte[12];
+        
+        var hash = hmac.ComputeHash(buffer);
+        Buffer.BlockCopy(hash, 0, result, 0, 12);
+        hmac.Clear();
+
+        return result;
     }
 
     private static byte[] HashPassword(this byte[] password, byte[] engineId, SnmpAuthenticationType authenticationType)
@@ -87,9 +106,9 @@ internal static class SnmpCrypting
         return extendedKey;
     }
 
-    public static byte[] ExtendShortKeyAES(this byte[] shortKey, byte[] engineId, SnmpAuthenticationType authenticationType, SnmpPrivacyType privacyType)
+    private static byte[] ExtendShortKeyAES(this byte[] shortKey, byte[] engineId, SnmpAuthenticationType authenticationType, SnmpPrivacyType privacyType)
     {
-        var minKeyLength = privacyType == SnmpPrivacyType.AES256 ? 32 : 24;
+        var minKeyLength = privacyType == SnmpPrivacyType.Aes256 ? 32 : 24;
 
         var extendShortKey = new byte[minKeyLength];
         var keyBuffer = new byte[shortKey.Length];
