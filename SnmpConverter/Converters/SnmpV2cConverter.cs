@@ -2,7 +2,7 @@
 
 namespace SnmpConverter;
 
-internal static class SnmpV2Converter
+internal static class SnmpV2cConverter
 {
     internal static SnmpPacketV2C SerializeV2c(this byte[] source, int offset)
     {
