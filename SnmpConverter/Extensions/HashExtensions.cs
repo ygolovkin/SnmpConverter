@@ -24,7 +24,7 @@ internal static class HashExtensions
             user.HashKey = Array.Empty<byte>();
         }
         
-        var key = Encoding.UTF8.GetBytes(user.Key);
+        var key = Encoding.UTF8.GetBytes(user.Key!);
         var hashKey = key.HashPassword(user.EngineId!.ToArray(), user.AuthenticationType);
         var engineId = user.EngineId!.ToArray();
 
@@ -45,8 +45,8 @@ internal static class HashExtensions
         }
 
         HMAC hmac = user.AuthenticationType == SnmpAuthenticationType.MD5
-            ? new HMACMD5(user.HashPassword)
-            : new HMACSHA1(user.HashPassword);
+            ? new HMACMD5(user.HashPassword!)
+            : new HMACSHA1(user.HashPassword!);
         var result = new byte[12];
         
         var hash = hmac.ComputeHash(buffer);

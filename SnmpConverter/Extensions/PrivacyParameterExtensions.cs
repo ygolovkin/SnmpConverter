@@ -32,7 +32,8 @@ internal static class PrivacyParameterExtensions
                 SnmpPrivacyType.TripleDes => source.DecryptByTripleDes(offset, length, user.HashKey!, privacyParameters),
                 SnmpPrivacyType.Aes128 => source.DecryptByAes128(offset, length, user.HashKey!, engineBoots, engineTime, privacyParameters),
                 SnmpPrivacyType.Aes192 => source.DecryptByAes192(offset, length, user.HashKey!, engineBoots, engineTime, privacyParameters),
-                SnmpPrivacyType.Aes256 => source.DecryptByAes256(offset, length, user.HashKey!, engineBoots, engineTime, privacyParameters)
+                SnmpPrivacyType.Aes256 => source.DecryptByAes256(offset, length, user.HashKey!, engineBoots, engineTime, privacyParameters),
+                _ => throw new ArgumentOutOfRangeException()
             };
             
             decryptResult.HandleError();
