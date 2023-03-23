@@ -52,9 +52,9 @@ internal static class SnmpV2cConverter
             .Concat(errorStatusValue.Value)
             .Concat(errorIndexValue.Value)
             .Concat(variableBindingsResult.Value)
-            .ToArray();
-
-        var messageDataLength = messageData.Length.ToLength().Value;
+            .ToArray()
+            .ToLength()
+            .Value;
 
         var pduTypeResult = packet.PduType.ToByteArray();
         pduTypeResult.HandleError();
@@ -65,15 +65,12 @@ internal static class SnmpV2cConverter
         var versionResult = packet.Version.ToByteArray();
         versionResult.HandleError();
 
-        var message = versionResult.Value
+        return versionResult.Value
             .Concat(communityResult.Value)
             .Concat(pduTypeResult.Value)
-            .Concat(messageDataLength)
             .Concat(messageData)
-            .ToArray();
-
-        var result = message.ToLength(SnmpValueType.CaptionOid);
-        result.HandleError();
-        return result.Value;
+            .ToArray()
+            .ToLength(SnmpValueType.CaptionOid)
+            .Value;
     }
 }

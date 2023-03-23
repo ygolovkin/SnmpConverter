@@ -8,4 +8,9 @@ internal static class MessageFlagExtensions
 
         return new SnmpResult<SnmpMessageFlag>(new SnmpMessageFlag(source[offset++]));
     }
+
+    internal static SnmpResult<byte[]> ToByteArray(this SnmpMessageFlag flag)
+    {
+        return (new[] { flag.Flag }).ToLength(SnmpValueType.OctetString);
+    }
 }

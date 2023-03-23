@@ -33,13 +33,47 @@ internal static class PrivacyParameterExtensions
                 SnmpPrivacyType.Aes128 => source.DecryptByAes128(offset, length, user.HashKey!, engineBoots, engineTime, privacyParameters),
                 SnmpPrivacyType.Aes192 => source.DecryptByAes192(offset, length, user.HashKey!, engineBoots, engineTime, privacyParameters),
                 SnmpPrivacyType.Aes256 => source.DecryptByAes256(offset, length, user.HashKey!, engineBoots, engineTime, privacyParameters),
-                _ => throw new ArgumentOutOfRangeException()
+                _ => throw new SnmpException("Incorrect", new ArgumentOutOfRangeException(nameof(user.PrivacyType)))
             };
             
             decryptResult.HandleError();
             outSource = decryptResult.Value;
             offset = 0;
         }
+        return new SnmpResult<byte[]>(privacyParameters);
+    }
+
+    internal static SnmpResult<byte[]> ToByteArray(
+        this byte[] source, 
+        SnmpUser user,
+        int engineBoots,
+        int engineTime,
+        out byte[] outSource)
+    {
+        outSource = source;
+        if(user is null || user.AuthenticationType == SnmpAuthenticationType.None)
+        {
+            return new SnmpResult<byte[]>(Array.Empty<byte>());
+        }
+
+        if(user.HashKey is null)
+        {
+            throw new SnmpException("Incorrect hash key.", new ArgumentException(nameof(user.HashKey)));
+        }
+
+        byte[] privacyParameters;
+        var outSourceResult = user.PrivacyType switch
+        {
+            SnmpPrivacyType.Des => source.EncryptByDes(user.HashKey, engineBoots, out privacyParameters),
+            SnmpPrivacyType.TripleDes => source.EncryptBy3Des(user.HashKey, engineBoots, user.AuthenticationType, out privacyParameters),
+            SnmpPrivacyType.Aes128 => source.EncryptByAes128(user.HashKey, engineBoots, engineTime, out privacyParameters),
+            SnmpPrivacyType.Aes192 => source.EncryptByAes192(user.HashKey, engineBoots, engineTime, out privacyParameters),
+            SnmpPrivacyType.Aes256 => source.EncryptByAes256(user.HashKey, engineBoots, engineTime, out privacyParameters),
+            _ => throw new SnmpException("Incorrect privacy type", new ArgumentException(nameof(user.PrivacyType)))
+        };
+
+        outSourceResult.HandleError();
+        outSource = outSourceResult.Value;
         return new SnmpResult<byte[]>(privacyParameters);
     }
 }

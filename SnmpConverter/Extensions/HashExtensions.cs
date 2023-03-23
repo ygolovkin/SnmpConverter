@@ -39,20 +39,33 @@ internal static class HashExtensions
 
     internal static byte[] GetHash(this byte[] buffer, SnmpUser? user)
     {
-        if (user is null || user.AuthenticationType == SnmpAuthenticationType.None)
+        if (user is null)
         {
             return buffer;
         }
 
-        HMAC hmac = user.AuthenticationType == SnmpAuthenticationType.MD5
-            ? new HMACMD5(user.HashPassword!)
-            : new HMACSHA1(user.HashPassword!);
+        return buffer.GetHash(user.AuthenticationType, user.HashPassword);
+    }
+
+    internal static byte[] GetHash(this byte[] buffer, SnmpAuthenticationType authenticationType, byte[]? key = null)
+    {
+        if(authenticationType == SnmpAuthenticationType.None)
+        {
+            return buffer;
+        }
+
+        HMAC hmac = key is null
+            ? authenticationType == SnmpAuthenticationType.MD5 
+                ? new HMACMD5() 
+                : new HMACSHA1()
+            : authenticationType == SnmpAuthenticationType.MD5 
+                ? new HMACMD5(key) 
+                : new HMACSHA1(key);
+
+        var hash = hmac.ComputeHash(buffer, 0, buffer.Length);
         var result = new byte[12];
-        
-        var hash = hmac.ComputeHash(buffer);
         Buffer.BlockCopy(hash, 0, result, 0, 12);
         hmac.Clear();
-
         return result;
     }
 

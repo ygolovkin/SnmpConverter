@@ -1,159 +1,207 @@
-﻿using System;
+using System;
 using System.Security.Cryptography;
 
 namespace SnmpConverter;
-
 internal static class EncryptingExtensions
 {
-    internal static SnmpResult<byte[]> DecryptByDes(this byte[]? source, int offset, int length, byte[] key, byte[] privacyParameters)
+    private static bool isSaltIncrement = true;
+    private static int salt = -1;
+
+    internal static SnmpResult<byte[]> EncryptByDes(this byte[] source, byte[] key, int engineBoots, out byte[] privacyParameters)
     {
-        if (length % 8 != 0
-            || source == null
-            || source.Length == 0
-            || offset > source.Length
-            || offset + length > source.Length)
+        privacyParameters = new byte[8];
+        if (key == null || key.Length < 16)
         {
-            return new SnmpResult<byte[]>("Incorrect packet data.");
+            return new SnmpResult<byte[]>("Incorrect data.");
         }
 
-        var data = new byte[length];
-        Buffer.BlockCopy(source, offset, data, 0, length);
+        InitSalt();
+        privacyParameters = CreateKey(engineBoots, salt, 8);
 
-        var iv = new byte[8];
-        for (var i = 0; i < 8; ++i)
+        byte[] iv = new byte[8];
+        for (int i = 0; i < iv.Length; i++)
         {
-            iv[i] = (byte)(key[8 + i] ^ privacyParameters[i]);
-        }
-
-        var des = DES.Create();
-        des.Mode = CipherMode.CBC;
-        des.Padding = PaddingMode.Zeros;
-        var outKey = new byte[8];
+            iv[i] = (byte)(privacyParameters[i] ^ key[8 + i]);
+        }            
+        byte[] outKey = new byte[8];
         Buffer.BlockCopy(key, 0, outKey, 0, 8);
 
-        des.Key = outKey;
-        des.IV = iv;
-
-        var transform = des.CreateDecryptor();
-        var decryptedData = transform.TransformFinalBlock(data, 0, data.Length);
-        des.Clear();
-
-        return new SnmpResult<byte[]>(decryptedData);
-    }
-
-    internal static SnmpResult<byte[]> DecryptByTripleDes(this byte[]? source, int offset, int length, byte[] key, byte[] privacyParameters)
-    {
-        if (length % 8 != 0
-            || source == null
-            || source.Length == 0
-            || offset > source.Length
-            || offset + length > source.Length)
+        int div = (int)Math.Floor(source.Length / 8.0);
+        if ((source.Length % 8) != 0)
         {
-            return new SnmpResult<byte[]>("Incorrect packet data.");
+            div += 1;
+        }
+        int newLength = div * 8;
+        byte[] result = new byte[newLength];
+        byte[] buffer = new byte[newLength];
+
+        byte[] inbuffer = new byte[8];
+        byte[] cipherText = iv;
+        int posIn = 0;
+        int posResult = 0;
+        Buffer.BlockCopy(source, 0, buffer, 0, source.Length);
+
+        var des = DES.Create();
+        des.Mode = CipherMode.ECB;
+        des.Padding = PaddingMode.None;
+
+        ICryptoTransform transform = des.CreateEncryptor(outKey, null);
+        for (int i = 0; i < div; i++)
+        {
+            for (int j = 0; j < 8; j++)
+            {
+                inbuffer[j] = (byte)(buffer[posIn] ^ cipherText[j]);
+                posIn++;
+            }
+            transform.TransformBlock(inbuffer, 0, inbuffer.Length, cipherText, 0);
+            Buffer.BlockCopy(cipherText, 0, result, posResult, cipherText.Length);
+            posResult += cipherText.Length;
         }
 
-        var iv = new byte[8];
-        for (var i = 0; i < iv.Length; i++)
+        des.Clear();
+        return new SnmpResult<byte[]>(result);
+    }
+
+    internal static SnmpResult<byte[]> EncryptBy3Des(this byte[] source, byte[] key, int engineBoots, SnmpAuthenticationType authenticationType, out byte[] privacyParameters)
+    {
+        InitSalt();
+        privacyParameters = CreateKey(engineBoots, salt, 8);
+
+        var privacyParametersHash = privacyParameters.GetHash(authenticationType);
+        privacyParameters = new byte[8];
+        Buffer.BlockCopy(privacyParametersHash, 0, privacyParameters, 0, 8);
+        byte[] iv = new byte[8];
+        for (int i = 0; i < iv.Length; i++)
         {
             iv[i] = (byte)(privacyParameters[i] ^ key[24 + i]);
         }
 
-        byte[] decryptedData;
+        byte[] encryptedData;
         try
         {
             var tripleDes = TripleDES.Create();
             tripleDes.Mode = CipherMode.CBC;
             tripleDes.Padding = PaddingMode.None;
+            byte[] normKey = new byte[24];
+            Buffer.BlockCopy(key, 0, normKey, 0, normKey.Length);
 
-            var outKey = new byte[24];
-            Buffer.BlockCopy(key, 0, outKey, 0, outKey.Length);
-
-            var transform = tripleDes.CreateDecryptor(outKey, iv);
-            decryptedData = transform.TransformFinalBlock(source, offset, length);
+            ICryptoTransform transform = tripleDes.CreateEncryptor(normKey, iv);
+            if ((source.Length % 8) == 0)
+            {
+                encryptedData = transform.TransformFinalBlock(source, 0, source.Length);
+            }
+            else
+            {
+                byte[] tmpbuffer = new byte[8 * ((source.Length / 8) + 1)];
+                Buffer.BlockCopy(source, source.Length, tmpbuffer, 0, source.Length);
+                encryptedData = transform.TransformFinalBlock(tmpbuffer, 0, tmpbuffer.Length);
+            }
         }
         catch (Exception ex)
         {
-            throw new SnmpException(
-                "Exception was thrown while TripleDES privacy protocol was decrypting data.", ex);
+            throw new SnmpException("Encrypt error.", ex);
         }
 
-        return new SnmpResult<byte[]>(decryptedData);
+        return new SnmpResult<byte[]>(encryptedData);
     }
 
-    internal static SnmpResult<byte[]> DecryptByAes128(this byte[] source, int offset, int length, byte[] key, int engineBoots, int engineTime, byte[] privacyParameters)
-    {
-        return source.DecryptByAes(offset, length, key, engineBoots, engineTime, privacyParameters, 16);
+    internal static SnmpResult<byte[]> EncryptByAes128(this byte[] source, byte[] key, int engineBoots, int engineTime, out byte[] privacyParameters)
+    {        
+        return source.EncryptByAes(key, engineBoots, engineTime, 16, out privacyParameters);
     }
 
-    internal static SnmpResult<byte[]> DecryptByAes192(this byte[] source, int offset, int length, byte[] key, int engineBoots, int engineTime, byte[] privacyParameters)
-    {
-        return source.DecryptByAes(offset, length, key, engineBoots, engineTime, privacyParameters, 24);
+    internal static SnmpResult<byte[]> EncryptByAes192(this byte[] source, byte[] key, int engineBoots, int engineTime, out byte[] privacyParameters)
+    {        
+        return source.EncryptByAes(key, engineBoots, engineTime, 24, out privacyParameters);
     }
 
-    internal static SnmpResult<byte[]> DecryptByAes256(this byte[] source, int offset, int length, byte[] key, int engineBoots, int engineTime, byte[] privacyParameters)
-    {
-        return source.DecryptByAes(offset, length, key, engineBoots, engineTime, privacyParameters, 32);
+    internal static SnmpResult<byte[]> EncryptByAes256(this byte[] source, byte[] key, int engineBoots, int engineTime, out byte[] privacyParameters)
+    {        
+        return source.EncryptByAes(key, engineBoots, engineTime, 32, out privacyParameters);
     }
 
-    private static SnmpResult<byte[]> DecryptByAes(this byte[] source, int offset, int length, byte[] Key, int engineBoots, int engineTime, byte[] privacyParameters, int keyBytes)
+    private static SnmpResult<byte[]> EncryptByAes(this byte[] source, byte[] key, int engineBoots, int engineTime, int keyBytes, out byte[] privacyParameters)
     {
-        byte[] decryptedData;
+        privacyParameters = new byte[8];
+        if (key == null || key.Length < keyBytes)
+        {
+            return new SnmpResult<byte[]>("Incorrect data.");
+        }
 
-        var iv = new byte[16];
-        var bootsBytes = BitConverter.GetBytes(engineBoots);
-        var timeBytes = BitConverter.GetBytes(engineTime);
-        iv[0] = bootsBytes[3];
-        iv[1] = bootsBytes[2];
-        iv[2] = bootsBytes[1];
-        iv[3] = bootsBytes[0];
-        iv[4] = timeBytes[3];
-        iv[5] = timeBytes[2];
-        iv[6] = timeBytes[1];
-        iv[7] = timeBytes[0];
+        var iv = CreateKey(engineBoots, engineTime, 16);
 
+        InitSalt();
+        var saltBytes = BitConverter.GetBytes(salt);
+        privacyParameters[0] = saltBytes[7];
+        privacyParameters[1] = saltBytes[6];
+        privacyParameters[2] = saltBytes[5];
+        privacyParameters[3] = saltBytes[4];
+        privacyParameters[4] = saltBytes[3];
+        privacyParameters[5] = saltBytes[2];
+        privacyParameters[6] = saltBytes[1];
+        privacyParameters[7] = saltBytes[0];
+        
         Buffer.BlockCopy(privacyParameters, 0, iv, 8, 8);
 
-        var rm = Aes.Create();
-        rm.KeySize = keyBytes * 8;
-        rm.FeedbackSize = 128;
-        rm.BlockSize = 128;
-        rm.Padding = PaddingMode.Zeros;
-        rm.Mode = CipherMode.CFB;
+        var aes = Aes.Create();
+        aes.KeySize = keyBytes * 8;
+        aes.FeedbackSize = 128;
+        aes.BlockSize = 128;
+        aes.Padding = PaddingMode.Zeros;
+        aes.Mode = CipherMode.CFB;
 
-        if (Key.Length > keyBytes)
+        var pkey = new byte[keyBytes];
+        Buffer.BlockCopy(key, 0, pkey, 0, keyBytes);
+        aes.Key = pkey;
+        aes.IV = iv;
+
+        var cryptor = aes.CreateEncryptor();
+        var encryptedData = cryptor.TransformFinalBlock(source, 0, source.Length);
+        if (encryptedData.Length != source.Length)
         {
-            var outKey = new byte[keyBytes];
-            Buffer.BlockCopy(Key, 0, outKey, 0, keyBytes);
-            rm.Key = outKey;
+            byte[] tmp = new byte[source.Length];
+            Buffer.BlockCopy(encryptedData, 0, tmp, 0, source.Length);
+            return new SnmpResult<byte[]>(tmp);
+        }
+        return new SnmpResult<byte[]>(encryptedData);
+    }
+
+    private static byte[] CreateKey(int first, int second, int size)
+    {
+        var key = new byte[size];
+
+        var firstBytes = BitConverter.GetBytes(first);
+        key[3] = firstBytes[0];
+        key[2] = firstBytes[1];
+        key[1] = firstBytes[2];
+        key[0] = firstBytes[3];
+
+        var secondBytes = BitConverter.GetBytes(second);
+        key[7] = secondBytes[0];
+        key[6] = secondBytes[1];
+        key[5] = secondBytes[2];
+        key[4] = secondBytes[3];
+
+        return key;
+    }
+
+    private static void InitSalt()
+    {
+        if (salt == -1)
+        {
+            Random rand = new Random();
+            salt = Convert.ToInt32(rand.Next(1, Int32.MaxValue));
         }
         else
         {
-            rm.Key = Key;
+            if (isSaltIncrement)
+            {
+                salt += 1;
+                if (salt < 0) 
+                {
+                    salt = 1;
+                }
+            }
         }
-
-        rm.IV = iv;
-        var cryptoTransform = rm.CreateDecryptor();
-
-        var data = new byte[length];
-        Buffer.BlockCopy(source, offset, data, 0, length);
-
-        if (data.Length % keyBytes != 0)
-        {
-            var buffer = new byte[length];
-            Buffer.BlockCopy(data, 0, buffer, 0, length);
-            var div = (int)Math.Floor(buffer.Length / (double)16);
-
-            var newLength = (div + 1) * 16;
-            var decryptBuffer = new byte[newLength];
-            Buffer.BlockCopy(buffer, 0, decryptBuffer, 0, buffer.Length);
-            decryptedData = cryptoTransform.TransformFinalBlock(decryptBuffer, 0, decryptBuffer.Length);
-            Buffer.BlockCopy(decryptedData, 0, buffer, 0, length);
-
-            return new SnmpResult<byte[]>(buffer);
-        }
-
-        decryptedData = cryptoTransform.TransformFinalBlock(data, 0, length);
-
-        return new SnmpResult<byte[]>(decryptedData);
     }
 }

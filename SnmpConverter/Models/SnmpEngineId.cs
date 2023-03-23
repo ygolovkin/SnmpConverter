@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace SnmpConverter;
 
-public class SnmpEngineId
+public class SnmpEngineId : IEquatable<SnmpEngineId>
 {
     private readonly byte[] _engineId;
 
@@ -62,5 +62,15 @@ public class SnmpEngineId
     public override string ToString()
     {
         return BitConverter.ToString(_engineId).Replace("-", "");
+    }
+
+    public bool Equals(SnmpEngineId? other)
+    {
+        if(other is null)
+        {
+            return false;
+        }
+
+        return other.ToArray().IsEqual(_engineId);
     }
 }

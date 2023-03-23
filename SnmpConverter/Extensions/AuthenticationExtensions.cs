@@ -17,7 +17,7 @@ internal static class AuthenticationExtensions
         if (!engineId.IsEmpty && user.AuthenticationType != SnmpAuthenticationType.None)
         {
             var buffer = new byte[source.Length];
-            var emptyHash = new byte[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+            var emptyHash = new byte[12];
             Buffer.BlockCopy(buffer, 0, buffer, 0, buffer.Length);
             Buffer.BlockCopy(emptyHash, 0, buffer, startPosition, emptyHash.Length);
             var hash = buffer.GetHash(user);

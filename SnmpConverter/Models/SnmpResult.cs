@@ -1,45 +1,44 @@
 ﻿using System;
 
-namespace SnmpConverter
+namespace SnmpConverter;
+
+internal class SnmpResult<T>
 {
-    internal class SnmpResult<T>
+    private readonly string? _error;
+
+    internal T Value { get; } = default!;
+
+    internal string Error => _error ?? string.Empty;
+
+    internal bool HasValue => _error is null;
+
+    internal bool HasError => _error is not null;
+
+    internal SnmpResult(T value)
     {
-        private readonly string? _error;
+        Value = value;
+    }
 
-        internal T Value { get; } = default!;
+    internal SnmpResult(string error)
+    {
+        _error = error;
+    }
 
-        internal string Error => _error ?? string.Empty;
-
-        internal bool HasValue => _error is null;
-
-        internal bool HasError => _error is not null;
-
-        internal SnmpResult(T value)
+    internal void HandleError()
+    {
+        if (HasError)
         {
-            Value = value;
+            throw new SnmpException(_error!);
         }
+    }
 
-        internal SnmpResult(string error)
+    internal void HandleError(Func<T, bool>? predicate, string message)
+    {
+        HandleError();
+
+        if (predicate is not null && predicate(Value))
         {
-            _error = error;
-        }
-
-        internal void HandleError()
-        {
-            if (HasError)
-            {
-                throw new SnmpException(_error!);
-            }
-        }
-
-        internal void HandleError(Func<T, bool>? predicate, string message)
-        {
-            HandleError();
-
-            if (predicate is not null && predicate(Value))
-            {
-                throw new SnmpException(message);
-            }
+            throw new SnmpException(message);
         }
     }
 }

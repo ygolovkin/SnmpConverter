@@ -76,7 +76,7 @@ public static class SnmpConvert
         return packet switch
         {
             SnmpPacketV2C v2C => v2C.SerializeV2c(),
-            SnmpPacketV3 v3 => v3.Serialize(),
+            SnmpPacketV3 v3 => v3.SerializeV3(),
             _ => throw new SnmpException("Unsupported version")
         };
     }

@@ -2,6 +2,9 @@
 
 namespace SnmpConverter;
 
+/// <summary>
+/// SNMP Exception
+/// </summary>
 public class SnmpException : Exception
 {
     public SnmpException() : base() { }

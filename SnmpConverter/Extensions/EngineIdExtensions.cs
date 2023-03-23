@@ -3,7 +3,7 @@
 namespace SnmpConverter;
 
 internal static class EngineIdExtensions
-{    
+{
     internal static SnmpResult<SnmpEngineId> ToEngineId(this byte[] source, ref int offset)
     {
         var length = source.ToLength(ref offset, SnmpValueType.OctetString, x => x!= 0 && x is < 10 or > 24,
@@ -15,5 +15,14 @@ internal static class EngineIdExtensions
 
         return new SnmpResult<SnmpEngineId>(new SnmpEngineId(engineId));
     }
-    
+
+    internal static SnmpResult<byte[]> ToByteArray(this SnmpEngineId? engineId)
+    {
+        if(engineId is null)
+        {
+            engineId = new SnmpEngineId();
+        }
+
+        return engineId.ToArray().ToLength(SnmpValueType.OctetString);
+    }
 }

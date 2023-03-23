@@ -39,9 +39,7 @@ internal static class VariableBindingExtensions
         var typeResult = variableBinding.Type.ToByteArray();
         typeResult.HandleError();
 
-        var valueResult = variableBinding.Value is null
-            ? Array.Empty<byte>().ToByteArray()
-            : variableBinding.Value.ToByteArray();
+        var valueResult = variableBinding.Value.ToByteArray();
         valueResult.HandleError();
 
         return new SnmpResult<byte[]>(oidResult.Value.Concat(typeResult.Value).Concat(valueResult.Value).ToArray());

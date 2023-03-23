@@ -30,6 +30,8 @@ public static class SnmpUsers
             throw new SnmpException("Users can't be null.", new ArgumentNullException(nameof(user)));
         }
 
+        CheckUser(user);
+
         AddRange(new[] { user });
     }
 
