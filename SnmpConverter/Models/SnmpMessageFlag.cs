@@ -1,13 +1,28 @@
 ﻿namespace SnmpConverter;
 
+/// <summary>
+/// SNMP message flag.
+/// </summary>
 public class SnmpMessageFlag
 {
+    /// <summary>
+    /// Authentication flag.
+    /// </summary>
     public bool AuthenticationFlag { get; set; }
 
+    /// <summary>
+    /// Privacy flag.
+    /// </summary>
     public bool PrivacyFlag { get; set; }
 
+    /// <summary>
+    /// Reportable flag.
+    /// </summary>
     public bool ReportableFlag { get; set; }
 
+    /// <summary>
+    /// Get flag.
+    /// </summary>
     public byte Flag
     {
         get
@@ -26,6 +41,10 @@ public class SnmpMessageFlag
         }
     }
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="SnmpMessageFlag"/> class.
+    /// </summary>
+    /// <param name="flag">Default value.</param>
     public SnmpMessageFlag(byte flag)
     {
         Flag = flag;

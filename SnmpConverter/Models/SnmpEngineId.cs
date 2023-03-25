@@ -4,19 +4,39 @@ using System.Linq;
 
 namespace SnmpConverter;
 
+/// <summary>
+/// SNMP engine identifier.
+/// </summary>
 public class SnmpEngineId : IEquatable<SnmpEngineId>
 {
+    /// <summary>
+    /// Engine identifier.
+    /// </summary>
     private readonly byte[] _engineId;
 
+    /// <summary>
+    /// Get total numbers of elements.
+    /// </summary>
     public int Length => _engineId.Length;
 
+    /// <summary>
+    /// Is EngineId's length zero.
+    /// </summary>
     public bool IsEmpty => Length == 0;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="SnmpEngineId"/> class.
+    /// </summary>
     public SnmpEngineId()
     {
         _engineId = Array.Empty<byte>();
     }
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="SnmpEngineId"/> class with collection of bytes.
+    /// </summary>
+    /// <param name="engineId">EngineId's collection of bytes.</param>
+    /// <exception cref="SnmpException"></exception>
     public SnmpEngineId(IEnumerable<byte> engineId)
     {
         if (engineId is null)
@@ -35,6 +55,11 @@ public class SnmpEngineId : IEquatable<SnmpEngineId>
         _engineId = buffer;
     }
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="SnmpEngineId"/> class with string.
+    /// </summary>
+    /// <param name="engineId">EngineId's string.</param>
+    /// <exception cref="SnmpException"></exception>
     public SnmpEngineId(string engineId)
     {
         if (engineId is null)
@@ -54,16 +79,29 @@ public class SnmpEngineId : IEquatable<SnmpEngineId>
             .ToArray();
     }
 
+    /// <summary>
+    /// Create an array from <see cref="SnmpEngineId">engine identifier</see>.
+    /// </summary>
+    /// <returns></returns>
     public byte[] ToArray()
     {
         return _engineId;
     }
 
+    /// <summary>
+    /// Create a <see cref="string"/> from <see cref="SnmpEngineId">engine identifier</see>.
+    /// </summary>
+    /// <returns></returns>
     public override string ToString()
     {
         return BitConverter.ToString(_engineId).Replace("-", "");
     }
 
+    /// <summary>
+    /// Compare two <see cref="SnmpEngineId">engine identifiers</see>.
+    /// </summary>
+    /// <param name="other">Another <see cref="SnmpEngineId">engine identifier</see>.</param>
+    /// <returns></returns>
     public bool Equals(SnmpEngineId? other)
     {
         if(other is null)

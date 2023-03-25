@@ -98,7 +98,7 @@ internal static class SnmpV3Converter
         var authenticationParameterResult = packet.AuthenticationParameter.ToByteArray();
         var hashBackOffset = encryptedMessageData.Length + packet.AuthenticationParameter.Length;
 
-        var usernameResult = packet.User!.Username.ToByteArray();
+        var usernameResult = packet.User!.Name.ToByteArray();
 
         var engineTimeResult = packet.EngineTime.ToByteArray();
         engineTimeResult.HandleError();

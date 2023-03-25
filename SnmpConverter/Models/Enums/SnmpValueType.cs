@@ -1,5 +1,8 @@
 ﻿namespace SnmpConverter;
 
+/// <summary>
+/// SNMP value type.
+/// </summary>
 public enum SnmpValueType : byte
 {
     Integer = 0x02,

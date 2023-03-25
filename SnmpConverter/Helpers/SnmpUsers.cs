@@ -10,7 +10,7 @@ public static class SnmpUsers
     {
         new SnmpUser
         {
-            Username = string.Empty,
+            Name = string.Empty,
             AuthenticationType = SnmpAuthenticationType.None,
             PrivacyType = SnmpPrivacyType.None,
             Password = string.Empty,
@@ -44,10 +44,10 @@ public static class SnmpUsers
 
         foreach (var user in users)
         {
-            var existUser = _users.FirstOrDefault(u => u.Username == user.Username);
+            var existUser = _users.FirstOrDefault(u => u.Name == user.Name);
             if(existUser is not null)
             {
-                throw new SnmpException($"User with username: {user.Username} already exists.", new ArgumentNullException(nameof(user.Username)));
+                throw new SnmpException($"User with username: {user.Name} already exists.", new ArgumentNullException(nameof(user.Name)));
             }
             CheckUser(user);
         }
@@ -59,7 +59,7 @@ public static class SnmpUsers
     {
         if(username is not null)
         {
-            _users = _users.Where(u => u.Username != username).ToList();
+            _users = _users.Where(u => u.Name != username).ToList();
         }
     }
 
@@ -70,7 +70,7 @@ public static class SnmpUsers
 
     internal static SnmpResult<SnmpUser> Get(string username)
     {
-        var snmpUser = _users.FirstOrDefault(u => u.Username == username);
+        var snmpUser = _users.FirstOrDefault(u => u.Name == username);
         if (snmpUser is null)
         {
             return new SnmpResult<SnmpUser>($"User {username} doesn't exist.");
@@ -81,10 +81,10 @@ public static class SnmpUsers
 
     private static void CheckUser(SnmpUser user)
     {
-        if (string.IsNullOrEmpty(user.Username))
+        if (string.IsNullOrEmpty(user.Name))
         {
             throw new SnmpException("User's name can't be null or empty.",
-                new ArgumentException("Incorrect username", nameof(user.Username)));
+                new ArgumentException("Incorrect username", nameof(user.Name)));
         }
 
         if (user.EngineId is null)
