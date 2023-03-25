@@ -55,40 +55,19 @@ internal static class SnmpV3Converter
         contextNameResult.HandleError(x => !engineIdResult.Value.IsEmpty && x != user.ContextName,
             "Incorrect user's Context Name.");
 
-        var pduTypeResult = source.ToPduType(ref offset);
-
-        source.ToLength(ref offset, x => x < 0, "Array too short.");
-
-        var requestIdResult = source.ToRequestId(ref offset);
-
-        var errorStatusResult = source.ToErrorStatus(ref offset);
-        errorStatusResult.HandleError();
-
-        var errorIndexResult = source.ToErrorIndex(ref offset);
-
-        var variableBindingsResult = source.ToVariableBindings(ref offset);
-        variableBindingsResult.HandleError();
-
-        var packet = new SnmpPacketV3
-        {
-            MessageId = messageIdResult.Value,
-            MessageMaxSize = messageMaxSizeResult.Value,
-            MessageFlag = messageFlagResult.Value,
-            MessageSecurityModel = messageSecurityModelResult.Value,
-            EngineId = engineIdResult.Value,
-            EngineBoots = engineBootsResult.Value,
-            EngineTime = engineTimeResult.Value,
-            User = userResult.Value,
-            AuthenticationParameter = authenticationParameterResult.Value,
-            PrivacyParameter = privacyParameterResult.Value,
-            ContextEngineId = contextEngineIdResult.Value,
-            ContextName = contextNameResult.Value,
-            PduType = pduTypeResult.Value,
-            RequestId = requestIdResult.Value,
-            ErrorStatus = errorStatusResult.Value,
-            ErrorIndex = errorIndexResult.Value,
-            VariableBindings = variableBindingsResult.Value
-        };
+        var packet = source.SerializeBase<SnmpPacketV3>(offset);
+        packet.MessageId = messageIdResult.Value;
+        packet.MessageMaxSize = messageMaxSizeResult.Value;
+        packet.MessageFlag = messageFlagResult.Value;
+        packet.MessageSecurityModel = messageSecurityModelResult.Value;
+        packet.EngineId = engineIdResult.Value;
+        packet.EngineBoots = engineBootsResult.Value;
+        packet.EngineTime = engineTimeResult.Value;
+        packet.User = userResult.Value;
+        packet.AuthenticationParameter = authenticationParameterResult.Value;
+        packet.PrivacyParameter = privacyParameterResult.Value;
+        packet.ContextEngineId = contextEngineIdResult.Value;
+        packet.ContextName = contextNameResult.Value;
 
         return packet;
     }
@@ -97,28 +76,7 @@ internal static class SnmpV3Converter
     {
         CheckPacket(packet);
 
-        var variableBindingsResult = packet.VariableBindings.ToByteArray();
-        variableBindingsResult.HandleError();
-
-        var errorIndexValue = packet.ErrorIndex.ToByteArray();
-        errorIndexValue.HandleError();
-
-        var errorStatusValue = packet.ErrorStatus.ToByteArray();
-        errorStatusValue.HandleError();
-
-        var requestIdValue = packet.RequestId.ToByteArray();
-        requestIdValue.HandleError();
-
-        var data = requestIdValue.Value
-            .Concat(errorStatusValue.Value)
-            .Concat(errorIndexValue.Value)
-            .Concat(variableBindingsResult.Value)
-            .ToArray()
-            .ToLength()
-            .Value;
-
-        var pduTypeResult = packet.PduType.ToByteArray();
-        pduTypeResult.HandleError();
+        var baseData = packet.SerializeBase();
 
         var contextNameResult = packet.ContextName.ToByteArray();
 
@@ -126,8 +84,7 @@ internal static class SnmpV3Converter
 
         var messageDataResult = contextEngineIdResult.Value
             .Concat(contextNameResult.Value)
-            .Concat(pduTypeResult.Value)
-            .Concat(data)
+            .Concat(baseData)
             .ToArray()
             .ToLength(SnmpValueType.CaptionOid);
 

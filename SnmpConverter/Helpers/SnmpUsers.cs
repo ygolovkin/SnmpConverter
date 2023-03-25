@@ -6,7 +6,7 @@ namespace SnmpConverter;
 
 public static class SnmpUsers
 {
-    private static readonly List<SnmpUser> _users = new()
+    private static List<SnmpUser> _users = new()
     {
         new SnmpUser
         {
@@ -44,10 +44,28 @@ public static class SnmpUsers
 
         foreach (var user in users)
         {
+            var existUser = _users.FirstOrDefault(u => u.Username == user.Username);
+            if(existUser is not null)
+            {
+                throw new SnmpException($"User with username: {user.Username} already exists.", new ArgumentNullException(nameof(user.Username)));
+            }
             CheckUser(user);
         }
 
         _users.AddRange(users);
+    }
+
+    public static void Delete(string username)
+    {
+        if(username is not null)
+        {
+            _users = _users.Where(u => u.Username != username).ToList();
+        }
+    }
+
+    public static void Clear()
+    {
+        _users.Clear();
     }
 
     internal static SnmpResult<SnmpUser> Get(string username)
