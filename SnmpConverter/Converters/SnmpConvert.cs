@@ -60,6 +60,7 @@ public static class SnmpConvert
 
         return versionResult.Value switch
         {
+            SnmpVersion.V1 => buffer.SerializeV1(offset),
             SnmpVersion.V2C => buffer.SerializeV2c(offset),
             SnmpVersion.V3 => buffer.SerializeV3(offset),
             _ => throw new SnmpException("Unsupported version")
@@ -75,6 +76,7 @@ public static class SnmpConvert
 
         return packet switch
         {
+            SnmpPacketV1 v1 => v1.SerializeV1(),
             SnmpPacketV2C v2C => v2C.SerializeV2c(),
             SnmpPacketV3 v3 => v3.SerializeV3(),
             _ => throw new SnmpException("Unsupported version")

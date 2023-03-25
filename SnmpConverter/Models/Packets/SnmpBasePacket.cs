@@ -20,4 +20,9 @@ public abstract class SnmpBasePacket
     {
         VariableBindings = new List<SnmpVariableBinding>();
     }
+
+    internal SnmpBasePacket(SnmpPduType pduType)
+    {
+        PduType = pduType;
+    }
 }

@@ -2,19 +2,19 @@
 
 namespace SnmpConverter;
 
-internal static class SnmpV2cConverter
+internal static class SnmpV1Converter
 {
-    internal static SnmpPacketV2C SerializeV2c(this byte[] source, int offset)
+    internal static SnmpPacketV1 SerializeV1(this byte[] source, int offset)
     {
         var communityResult = source.ToString(ref offset);
 
-        var packet = source.SerializeBase<SnmpPacketV2C>(offset);
+        var packet = source.SerializeBase<SnmpPacketV1>(offset);
         packet.Community = communityResult.Value;
 
         return packet;
     }
 
-    internal static byte[] SerializeV2c(this SnmpPacketV2C packet)
+    internal static byte[] SerializeV1(this SnmpPacketV1 packet)
     {
         var baseData = packet.SerializeBase();
 

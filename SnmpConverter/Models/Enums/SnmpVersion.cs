@@ -1,6 +1,5 @@
 ﻿namespace SnmpConverter;
 
-
 /// <summary>
 /// SNMP Version
 /// </summary>
