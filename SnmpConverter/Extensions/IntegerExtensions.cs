@@ -17,7 +17,7 @@ internal static class IntegerExtensions
         {
             for (var i = 3; i >= 0; i--)
             {
-                if (buffer.Length > 0 || bytes[i] != Constants.LastByte)
+                if (buffer.Length > 0 || bytes[i] != SnmpConstants.LastByte)
                 {
                     buffer = buffer.Append(bytes[i]);
                 }
@@ -25,12 +25,12 @@ internal static class IntegerExtensions
 
             if (buffer.Length == 0)
             {
-                buffer = buffer.Append(Constants.LastByte);
+                buffer = buffer.Append(SnmpConstants.LastByte);
             }
 
-            if ((buffer[0] & Constants.HighByte) == 0)
+            if ((buffer[0] & SnmpConstants.HighByte) == 0)
             {
-                buffer = buffer.Prepend(Constants.LastByte);
+                buffer = buffer.Prepend(SnmpConstants.LastByte);
             }
         }
         else
@@ -47,13 +47,13 @@ internal static class IntegerExtensions
             {
                 buffer = buffer.Append(0);
             }
-            else if ((buffer[0] & Constants.HighByte) != 0)
+            else if ((buffer[0] & SnmpConstants.HighByte) != 0)
             {
                 buffer = buffer.Prepend(0);
             }
         }
 
-        if (buffer.Length > 1 && buffer[0] == Constants.LastByte && (buffer[1] & Constants.HighByte) != 0)
+        if (buffer.Length > 1 && buffer[0] == SnmpConstants.LastByte && (buffer[1] & SnmpConstants.HighByte) != 0)
         {
             buffer = buffer.Prepend(0);
         }
@@ -67,12 +67,12 @@ internal static class IntegerExtensions
     {
         var length = source.ToLength(ref offset, SnmpValueType.Integer, x => x is < 0 or > 5, "Incorrect Int32 length").Value;
 
-        var isNegative = (source[offset] & Constants.HighByte) != 0;
+        var isNegative = (source[offset] & SnmpConstants.HighByte) != 0;
 
-        if (source[offset] == Constants.HighByte 
+        if (source[offset] == SnmpConstants.HighByte 
             && length > 2 
-            && source[offset + 1] == Constants.LastByte 
-            && (source[offset + 2] & Constants.HighByte) != 0)
+            && source[offset + 1] == SnmpConstants.LastByte 
+            && (source[offset + 2] & SnmpConstants.HighByte) != 0)
         {
             offset += 1;
             length -= 1;

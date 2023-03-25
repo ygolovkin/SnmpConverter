@@ -34,4 +34,14 @@ internal static class ArrayExtensions
 
         return source.Concat(values).ToArray();
     }
+
+    internal static bool IsEqual(this byte[]? first, byte[]? second)
+    {
+        if (first == null || second == null || first.Length != second.Length)
+        {
+            return false;
+        }
+
+        return !first.Where((t, i) => t != second[i]).Any();
+    }
 }

@@ -4,14 +4,14 @@ namespace SnmpConverter;
 
 internal static class OidExtensions
 {
-    internal static SnmpResult<Oid> ToOid(this byte[] source, ref int offset)
+    internal static SnmpResult<SnmpOid> ToOid(this byte[] source, ref int offset)
     {
         var length = source.ToLength(ref offset, SnmpValueType.ObjectIdentifier, x => x < 0,
             "Incorrect Oid's length.").Value;
 
         uint first = source[offset++];
 
-        var oid = new Oid { first };
+        var oid = new SnmpOid { first };
 
         if (length == 1)
         {
@@ -28,7 +28,7 @@ internal static class OidExtensions
         while (length > 0)
         {
             uint result = 0;
-            if ((source[offset] & Constants.HighByte) == 0)
+            if ((source[offset] & SnmpConstants.HighByte) == 0)
             {
                 result = source[offset];
                 offset++;
@@ -40,8 +40,8 @@ internal static class OidExtensions
                 var completed = false;
                 do
                 {
-                    bytes = bytes.Append((byte)(source[offset] & ~Constants.HighByte));
-                    if ((source[offset] & Constants.HighByte) == 0)
+                    bytes = bytes.Append((byte)(source[offset] & ~SnmpConstants.HighByte));
+                    if ((source[offset] & SnmpConstants.HighByte) == 0)
                     {
                         completed = true;
                     }
@@ -58,12 +58,12 @@ internal static class OidExtensions
             oid.Add(result);
         }
 
-        return new SnmpResult<Oid>(oid);
+        return new SnmpResult<SnmpOid>(oid);
     }
 
-    internal static SnmpResult<byte[]> ToByteArray(this Oid oid)
+    internal static SnmpResult<byte[]> ToByteArray(this SnmpOid snmpOid)
     {
-        var array = oid.ToArray();
+        var array = snmpOid.ToArray();
         var bytes = Array.Empty<byte>();
         if (array.Length < 2)
         {
@@ -95,9 +95,9 @@ internal static class OidExtensions
             {
                 var temp = BitConverter.GetBytes(value);
                 var tFirst = temp[0];
-                if ((tFirst & Constants.HighByte) != 0)
+                if ((tFirst & SnmpConstants.HighByte) != 0)
                 {
-                    tFirst = (byte)(tFirst & ~Constants.HighByte);
+                    tFirst = (byte)(tFirst & ~SnmpConstants.HighByte);
                 }
                 value >>= 7;
                 bytes = bytes.Append(tFirst);
@@ -105,7 +105,7 @@ internal static class OidExtensions
             for (var i = bytes.Length - 1; i >= 0; i--)
             {
                 result = i > 0 
-                    ? result.Append((byte)(bytes[i] | Constants.HighByte)) 
+                    ? result.Append((byte)(bytes[i] | SnmpConstants.HighByte)) 
                     : result.Append(bytes[i]);
             }
         }

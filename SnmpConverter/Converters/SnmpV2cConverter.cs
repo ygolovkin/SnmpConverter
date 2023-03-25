@@ -2,13 +2,13 @@
 
 namespace SnmpConverter;
 
-internal static class SnmpV2Converter
+internal static class SnmpV2cConverter
 {
     internal static SnmpPacketV2C SerializeV2c(this byte[] source, int offset)
     {
         var communityResult = source.ToString(ref offset);
 
-        var typeRequestResult = source.ToPduType(ref offset);
+        var pduTypeResult = source.ToPduType(ref offset);
 
         source.ToLength(ref offset, x => x < 0, "Array too short.");
 
@@ -25,7 +25,7 @@ internal static class SnmpV2Converter
         var packet = new SnmpPacketV2C
         {
             Community = communityResult.Value,
-            PduType = typeRequestResult.Value,
+            PduType = pduTypeResult.Value,
             RequestId = requestIdResult.Value,
             ErrorStatus = errorStatusResult.Value,
             ErrorIndex = errorIndexResult.Value,
@@ -52,9 +52,9 @@ internal static class SnmpV2Converter
             .Concat(errorStatusValue.Value)
             .Concat(errorIndexValue.Value)
             .Concat(variableBindingsResult.Value)
-            .ToArray();
-
-        var messageDataLength = messageData.Length.ToLength().Value;
+            .ToArray()
+            .ToLength()
+            .Value;
 
         var pduTypeResult = packet.PduType.ToByteArray();
         pduTypeResult.HandleError();
@@ -65,15 +65,12 @@ internal static class SnmpV2Converter
         var versionResult = packet.Version.ToByteArray();
         versionResult.HandleError();
 
-        var message = versionResult.Value
+        return versionResult.Value
             .Concat(communityResult.Value)
             .Concat(pduTypeResult.Value)
-            .Concat(messageDataLength)
             .Concat(messageData)
-            .ToArray();
-
-        var result = message.ToLength(SnmpValueType.CaptionOid);
-        result.HandleError();
-        return result.Value;
+            .ToArray()
+            .ToLength(SnmpValueType.CaptionOid)
+            .Value;
     }
 }

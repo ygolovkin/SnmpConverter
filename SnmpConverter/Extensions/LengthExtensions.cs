@@ -56,13 +56,13 @@ internal static class LengthExtensions
     private static SnmpResult<int> GetLength(this byte[] source, ref int offset)
     {
         int length;
-        if ((source[offset] & Constants.HighByte) == 0)
+        if ((source[offset] & SnmpConstants.HighByte) == 0)
         {
             length = source[offset++];
         }
         else
         {
-            length = source[offset++] & ~Constants.HighByte;
+            length = source[offset++] & ~SnmpConstants.HighByte;
             var value = 0;
             for (var i = 0; i < length; i++)
             {
@@ -95,10 +95,10 @@ internal static class LengthExtensions
         {
             buffer = buffer.Append(0);
         }
-        if (buffer.Length != 1 || (buffer[0] & Constants.HighByte) != 0)
+        if (buffer.Length != 1 || (buffer[0] & SnmpConstants.HighByte) != 0)
         {
             var header = (byte)buffer.Length;
-            header = (byte)(header | Constants.HighByte);
+            header = (byte)(header | SnmpConstants.HighByte);
             buffer = buffer.Prepend(header);
         }
         return new SnmpResult<byte[]>(buffer);
