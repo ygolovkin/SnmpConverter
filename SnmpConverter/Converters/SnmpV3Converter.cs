@@ -7,7 +7,7 @@ internal static class SnmpV3Converter
 {
     internal static SnmpPacketV3 SerializeV3(this byte[] source, int offset)
     {
-        source.ToLength(ref offset, SnmpValueType.CaptionOid, x => x < 5, "Incorrect global data's length.");
+        source.ToLength(ref offset, SnmpConstants.Sequence, x => x < 5, "Incorrect global data's length.");
 
         var messageIdResult = source.ToMessageId(ref offset);
 
@@ -19,7 +19,7 @@ internal static class SnmpV3Converter
         
         source.ToLength(ref offset, SnmpValueType.OctetString, x => x < 5, "Incorrect global data's length.");
         
-        source.ToLength(ref offset, SnmpValueType.CaptionOid, x => x < 5, "Incorrect global data's length.");
+        source.ToLength(ref offset, SnmpConstants.Sequence, x => x < 5, "Incorrect global data's length.");
 
         var engineIdResult = source.ToEngineId(ref offset);
 
@@ -45,7 +45,7 @@ internal static class SnmpV3Converter
             out var outSource);
         source = outSource;
 
-        source.ToLength(ref offset, SnmpValueType.CaptionOid, x => x < 5, "Incorrect global data's length.");
+        source.ToLength(ref offset, SnmpConstants.Sequence, x => x < 5, "Incorrect global data's length.");
 
         var contextEngineIdResult = source.ToContextEngineId(ref offset);
         contextEngineIdResult.HandleError(engineId => !engineIdResult.Value.IsEmpty && !engineId.Equals(user.ContextEngineId), 
@@ -86,7 +86,7 @@ internal static class SnmpV3Converter
             .Concat(contextNameResult.Value)
             .Concat(baseData)
             .ToArray()
-            .ToLength(SnmpValueType.CaptionOid);
+            .ToLength(SnmpConstants.Sequence);
 
         var privacyParameterResult = messageDataResult.Value.ToByteArray(
             packet.User!,
@@ -115,7 +115,7 @@ internal static class SnmpV3Converter
             .Concat(authenticationParameterResult.Value) 
             .Concat(privacyParameterResult.Value)
             .ToArray()
-            .ToLength(SnmpValueType.CaptionOid).Value
+            .ToLength(SnmpConstants.Sequence).Value
             .ToLength(SnmpValueType.OctetString);
 
         var messageSecurityModelResult = packet.MessageSecurityModel.ToByteArray();
@@ -134,7 +134,7 @@ internal static class SnmpV3Converter
             .Concat(messageFlagResult.Value)
             .Concat(messageSecurityModelResult.Value)
             .ToArray()
-            .ToLength(SnmpValueType.CaptionOid);
+            .ToLength(SnmpConstants.Sequence);
 
         var versionResult = packet.Version.ToByteArray();
         versionResult.HandleError();
@@ -144,7 +144,7 @@ internal static class SnmpV3Converter
             .Concat(messageAuthoritativeDataResult.Value)
             .Concat(encryptedMessageData)
             .ToArray()
-            .ToLength(SnmpValueType.CaptionOid)
+            .ToLength(SnmpConstants.Sequence)
             .Value;
 
         if(packet.User.AuthenticationType != SnmpAuthenticationType.None)

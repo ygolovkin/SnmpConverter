@@ -13,4 +13,6 @@ internal static class SnmpConstants
     internal const byte MessagePrivacyFlag = 0x02;
 
     internal const byte MessageReportableFlag = 0x04;
+
+    internal const byte Sequence = 0x30;
 }

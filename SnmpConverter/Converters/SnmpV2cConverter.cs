@@ -28,7 +28,7 @@ internal static class SnmpV2cConverter
             .Concat(communityResult.Value)
             .Concat(baseData)
             .ToArray()
-            .ToLength(SnmpValueType.CaptionOid)
+            .ToLength(SnmpConstants.Sequence)
             .Value;
     }
 }

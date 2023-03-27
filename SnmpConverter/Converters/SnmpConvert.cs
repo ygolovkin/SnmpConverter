@@ -49,7 +49,7 @@ public static class SnmpConvert
         var buffer = new byte[length];
         Buffer.BlockCopy(source, offset, buffer, 0, length);
 
-        if (buffer[offset++] != (byte)SnmpValueType.CaptionOid)
+        if (buffer[offset++] != SnmpConstants.Sequence)
         {
             throw new SnmpException("Incorrect format");
         }

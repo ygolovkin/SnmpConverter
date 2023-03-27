@@ -7,7 +7,7 @@ internal static class VariableBindingExtensions
 {
     internal static SnmpResult<SnmpVariableBinding> ToVariableBinding(this byte[] source, ref int offset)
     {
-        source.ToLength(ref offset, SnmpValueType.CaptionOid, x => x < 0, "Incorrect variable binding's length.");
+        source.ToLength(ref offset, SnmpConstants.Sequence, x => x < 0, "Incorrect variable binding's length.");
 
         var oidResult = source.ToOid(ref offset);
 

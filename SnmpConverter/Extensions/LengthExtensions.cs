@@ -28,6 +28,12 @@ internal static class LengthExtensions
 
     internal static SnmpResult<byte[]> ToLength(this byte[] source, SnmpValueType? valueType = null)
     {
+        byte? byteValueType = valueType is null ? null : (byte)valueType;
+        return source.ToLength(byteValueType);
+    }
+
+    internal static SnmpResult<byte[]> ToLength(this byte[] source, byte? valueType = null)
+    {
         var lengthResult = source.Length.GetLength();
         lengthResult.HandleError();
         var valueTypeArray = valueType is null ? Array.Empty<byte>() : new[] { (byte)valueType };
@@ -41,9 +47,15 @@ internal static class LengthExtensions
     }
 
     internal static SnmpResult<int> ToLength(this byte[] source, ref int offset, SnmpValueType valueType,
+    Func<int, bool>? predicate, string message)
+    {
+        return source.ToLength(ref offset, (byte)valueType, predicate, message);
+    }
+
+    internal static SnmpResult<int> ToLength(this byte[] source, ref int offset, byte valueType,
         Func<int, bool>? predicate, string message)
     {
-        if (source[offset++] != (byte)valueType)
+        if (source[offset++] != valueType)
         {
             return new SnmpResult<int>($"Incorrect type of {valueType}");
         }

@@ -55,6 +55,11 @@ public static class SnmpUsers
         _users.AddRange(users);
     }
 
+    public static List<SnmpUser> GetUsers()
+    {
+        return _users;
+    }
+
     public static void Delete(string username)
     {
         if(username is not null)
