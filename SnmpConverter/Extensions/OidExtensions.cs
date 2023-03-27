@@ -6,8 +6,8 @@ internal static class OidExtensions
 {
     internal static SnmpResult<SnmpOid> ToOid(this byte[] source, ref int offset)
     {
-        var length = source.ToLength(ref offset, SnmpValueType.ObjectIdentifier, x => x < 0,
-            "Incorrect Oid's length.").Value;
+        var length = source.ToLength(ref offset, SnmpValueType.ObjectIdentifier)
+            .HandleError(x => x < 0, "Incorrect Oid's length.");
 
         uint first = source[offset++];
 

@@ -58,14 +58,14 @@ internal static class IntegerExtensions
             buffer = buffer.Prepend(0);
         }
 
-        buffer.Length.ToLength();
+        buffer.Length.ToLength().HandleError();
 
         return buffer.ToLength(SnmpValueType.Integer);
     }
 
     internal static SnmpResult<int> ToInt32(this byte[] source, ref int offset)
     {
-        var length = source.ToLength(ref offset, SnmpValueType.Integer, x => x is < 0 or > 5, "Incorrect Int32 length").Value;
+        var length = source.ToLength(ref offset, SnmpValueType.Integer).HandleError(x => x is < 0 or > 5, "Incorrect Int32 length");
 
         var isNegative = (source[offset] & SnmpConstants.HighByte) != 0;
 

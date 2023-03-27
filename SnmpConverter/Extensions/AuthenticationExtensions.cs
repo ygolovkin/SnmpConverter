@@ -6,13 +6,13 @@ internal static class AuthenticationExtensions
 {
     internal static SnmpResult<byte[]> ToAuthenticationParameter(this byte[] source, SnmpEngineId engineId, SnmpUser user, ref int offset)
     {
-        var length = source.ToLength(ref offset, SnmpValueType.OctetString, x => x != 12,
+        var length = source.ToLength(ref offset, SnmpValueType.OctetString).HandleError(x => x != 12,
             "Incorrect authentication parameter's length.");
 
-        var parameter = new byte[length.Value];
+        var parameter = new byte[length];
         var startPosition = offset;
-        Buffer.BlockCopy(source, offset, parameter, 0, length.Value);
-        offset += length.Value;
+        Buffer.BlockCopy(source, offset, parameter, 0, length);
+        offset += length;
 
         if (!engineId.IsEmpty && user.AuthenticationType != SnmpAuthenticationType.None)
         {

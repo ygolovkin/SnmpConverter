@@ -55,12 +55,14 @@ internal class SnmpResult<T>
     /// Handle error.
     /// </summary>
     /// <exception cref="SnmpException"></exception>
-    internal void HandleError()
+    internal T HandleError()
     {
         if (HasError)
         {
             throw new SnmpException(_error!);
         }
+
+        return Value;
     }
 
     /// <summary>
@@ -69,7 +71,7 @@ internal class SnmpResult<T>
     /// <param name="predicate">Predicate for handle.</param>
     /// <param name="message">Error message for unhandling behavior.</param>
     /// <exception cref="SnmpException"></exception>
-    internal void HandleError(Func<T, bool>? predicate, string message)
+    internal T HandleError(Func<T, bool>? predicate, string message)
     {
         HandleError();
 
@@ -77,5 +79,7 @@ internal class SnmpResult<T>
         {
             throw new SnmpException(message);
         }
+
+        return Value;
     }
 }

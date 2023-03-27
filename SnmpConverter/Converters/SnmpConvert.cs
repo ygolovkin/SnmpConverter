@@ -54,14 +54,15 @@ public static class SnmpConvert
             throw new SnmpException("Incorrect format");
         }
 
-        buffer.ToLength(ref offset, x => x < 2, "Array too short");
+        buffer.ToLength(ref offset).HandleError(x => x < 2, "Array too short");
 
-        var versionResult = buffer.ToVersion(ref offset);
+        var version = buffer.ToVersion(ref offset).HandleError();
 
-        return versionResult.Value switch
+        return version switch
         {
             SnmpVersion.V1 => buffer.SerializeV1(offset),
             SnmpVersion.V2C => buffer.SerializeV2c(offset),
+            SnmpVersion.V2U => buffer.SerializeV2u(offset),
             SnmpVersion.V3 => buffer.SerializeV3(offset),
             _ => throw new SnmpException("Unsupported version")
         };
@@ -77,7 +78,8 @@ public static class SnmpConvert
         return packet switch
         {
             SnmpPacketV1 v1 => v1.SerializeV1(),
-            SnmpPacketV2C v2C => v2C.SerializeV2c(),
+            SnmpPacketV2C v2c => v2c.SerializeV2c(),
+            SnmpPacketV2U v2u => v2u.SerializeV2u(),
             SnmpPacketV3 v3 => v3.SerializeV3(),
             _ => throw new SnmpException("Unsupported version")
         };

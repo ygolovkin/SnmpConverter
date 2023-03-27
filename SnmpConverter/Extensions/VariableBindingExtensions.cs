@@ -7,21 +7,20 @@ internal static class VariableBindingExtensions
 {
     internal static SnmpResult<SnmpVariableBinding> ToVariableBinding(this byte[] source, ref int offset)
     {
-        source.ToLength(ref offset, SnmpConstants.Sequence, x => x < 0, "Incorrect variable binding's length.");
+        source.ToLength(ref offset, SnmpConstants.Sequence)
+            .HandleError(x => x < 0, "Incorrect variable binding's length.");
 
-        var oidResult = source.ToOid(ref offset);
+        var oid = source.ToOid(ref offset).HandleError();
 
-        var valueTypeResult = source.ToValueType(ref offset);
-        valueTypeResult.HandleError();
+        var valueType = source.ToValueType(ref offset).HandleError();
 
-        var valueResult = source.ToValue(ref offset);
-        valueResult.HandleError();
+        var value = source.ToValue(ref offset).HandleError();
 
         var variableBinding = new SnmpVariableBinding
         {
-            Oid = oidResult.Value,
-            Type = valueTypeResult.Value,
-            Value = valueResult.Value
+            Oid = oid,
+            Type = valueType,
+            Value = value
         };
         return new SnmpResult<SnmpVariableBinding>(variableBinding);
     }
@@ -33,15 +32,12 @@ internal static class VariableBindingExtensions
             return new SnmpResult<byte[]>("Incorrect format of variable binding.");
         }
 
-        var oidResult = variableBinding.Oid.ToByteArray();
-        oidResult.HandleError();
+        var oid = variableBinding.Oid.ToByteArray().HandleError();
 
-        var typeResult = variableBinding.Type.ToByteArray();
-        typeResult.HandleError();
+        var valueType = variableBinding.Type.ToByteArray().HandleError();
 
-        var valueResult = variableBinding.Value.ToByteArray();
-        valueResult.HandleError();
+        var value = variableBinding.Value.ToByteArray().HandleError();
 
-        return new SnmpResult<byte[]>(oidResult.Value.Concat(typeResult.Value).Concat(valueResult.Value).ToArray());
+        return new SnmpResult<byte[]>(oid.Concat(valueType).Concat(value).ToArray());
     }
 }
