@@ -26,13 +26,18 @@ internal static class LengthExtensions
         return result;
     }
 
-    internal static SnmpResult<byte[]> ToLength(this byte[] source, SnmpValueType? valueType = null)
+    internal static SnmpResult<byte[]> ToLength(this byte[] source)
     {
-        byte? byteValueType = valueType is null ? null : (byte)valueType;
+        byte? byteValueType = null;
         return source.ToLength(byteValueType);
     }
 
-    internal static SnmpResult<byte[]> ToLength(this byte[] source, byte? valueType = null)
+    internal static SnmpResult<byte[]> ToLength(this byte[] source, SnmpValueType valueType)
+    {
+        return source.ToLength((byte)valueType);
+    }
+
+    internal static SnmpResult<byte[]> ToLength(this byte[] source, byte? valueType)
     {
         var lengthResult = source.Length.GetLength();
         lengthResult.HandleError();
