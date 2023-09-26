@@ -6,4 +6,8 @@
     <TargetFrameworks>net7.0</TargetFrameworks>
   </PropertyGroup>
 
+  <ItemGroup>
+	  <InternalsVisibleTo Include="SnmpConverter.Tests"/>
+  </ItemGroup>
+
 </Project>
