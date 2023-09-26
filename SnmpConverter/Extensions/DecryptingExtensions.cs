@@ -5,7 +5,7 @@ namespace SnmpConverter;
 
 internal static class DecryptingExtensions
 {
-    internal static SnmpResult<byte[]> DecryptByDes(this byte[]? source, int offset, int length, byte[] key, byte[] privacyParameters)
+    internal static byte[] DecryptByDes(this byte[]? source, int offset, int length, byte[] key, byte[] privacyParameters)
     {
         if (length % 8 != 0
             || source == null
@@ -13,7 +13,7 @@ internal static class DecryptingExtensions
             || offset > source.Length
             || offset + length > source.Length)
         {
-            return new SnmpResult<byte[]>("Incorrect data.");
+            throw new SnmpException("Incorrect data.");
         }
 
         var data = new byte[length];
@@ -38,10 +38,10 @@ internal static class DecryptingExtensions
         var decryptedData = transform.TransformFinalBlock(data, 0, data.Length);
         des.Clear();
 
-        return new SnmpResult<byte[]>(decryptedData);
+        return decryptedData;
     }
 
-    internal static SnmpResult<byte[]> DecryptByTripleDes(this byte[]? source, int offset, int length, byte[] key, byte[] privacyParameters)
+    internal static byte[] DecryptByTripleDes(this byte[]? source, int offset, int length, byte[] key, byte[] privacyParameters)
     {
         if (length % 8 != 0
             || source == null
@@ -49,7 +49,7 @@ internal static class DecryptingExtensions
             || offset > source.Length
             || offset + length > source.Length)
         {
-            return new SnmpResult<byte[]>("Incorrect data.");
+            throw new SnmpException("Incorrect data.");
         }
 
         var iv = new byte[8];
@@ -77,25 +77,25 @@ internal static class DecryptingExtensions
                 "Exception was thrown while TripleDES privacy protocol was decrypting data.", ex);
         }
 
-        return new SnmpResult<byte[]>(decryptedData);
+        return decryptedData;
     }
 
-    internal static SnmpResult<byte[]> DecryptByAes128(this byte[] source, int offset, int length, byte[] key, int engineBoots, int engineTime, byte[] privacyParameters)
+    internal static byte[] DecryptByAes128(this byte[] source, int offset, int length, byte[] key, int engineBoots, int engineTime, byte[] privacyParameters)
     {
         return source.DecryptByAes(offset, length, key, engineBoots, engineTime, 16, privacyParameters);
     }
 
-    internal static SnmpResult<byte[]> DecryptByAes192(this byte[] source, int offset, int length, byte[] key, int engineBoots, int engineTime, byte[] privacyParameters)
+    internal static byte[] DecryptByAes192(this byte[] source, int offset, int length, byte[] key, int engineBoots, int engineTime, byte[] privacyParameters)
     {
         return source.DecryptByAes(offset, length, key, engineBoots, engineTime, 24, privacyParameters);
     }
 
-    internal static SnmpResult<byte[]> DecryptByAes256(this byte[] source, int offset, int length, byte[] key, int engineBoots, int engineTime, byte[] privacyParameters)
+    internal static byte[] DecryptByAes256(this byte[] source, int offset, int length, byte[] key, int engineBoots, int engineTime, byte[] privacyParameters)
     {
         return source.DecryptByAes(offset, length, key, engineBoots, engineTime, 32, privacyParameters);
     }
 
-    private static SnmpResult<byte[]> DecryptByAes(this byte[] source, int offset, int length, byte[] Key, int engineBoots, int engineTime, int keyBytes, byte[] privacyParameters)
+    private static byte[] DecryptByAes(this byte[] source, int offset, int length, byte[] key, int engineBoots, int engineTime, int keyBytes, byte[] privacyParameters)
     {
         byte[] decryptedData;
 
@@ -120,15 +120,15 @@ internal static class DecryptingExtensions
         aes.Padding = PaddingMode.Zeros;
         aes.Mode = CipherMode.CFB;
 
-        if (Key.Length > keyBytes)
+        if (key.Length > keyBytes)
         {
             var outKey = new byte[keyBytes];
-            Buffer.BlockCopy(Key, 0, outKey, 0, keyBytes);
+            Buffer.BlockCopy(key, 0, outKey, 0, keyBytes);
             aes.Key = outKey;
         }
         else
         {
-            aes.Key = Key;
+            aes.Key = key;
         }
 
         aes.IV = iv;
@@ -149,11 +149,11 @@ internal static class DecryptingExtensions
             decryptedData = cryptoTransform.TransformFinalBlock(decryptBuffer, 0, decryptBuffer.Length);
             Buffer.BlockCopy(decryptedData, 0, buffer, 0, length);
 
-            return new SnmpResult<byte[]>(buffer);
+            return buffer;
         }
 
         decryptedData = cryptoTransform.TransformFinalBlock(data, 0, length);
 
-        return new SnmpResult<byte[]>(decryptedData);
+        return decryptedData;
     }
 }

@@ -6,55 +6,47 @@ internal static class SnmpBaseConverter
 {
     internal static T SerializeBase<T>(this byte[] source, int offset) where T : SnmpBasePacket, new()
     {
-        var pduTypeResult = source.ToPduType(ref offset);
+        var pduType = source.ToPduType(ref offset);
 
         source.ToLength(ref offset, x => x < 0, "Array too short.");
 
-        var requestIdResult = source.ToRequestId(ref offset);
+        var requestId = source.ToRequestId(ref offset);
 
-        var errorStatusResult = source.ToErrorStatus(ref offset);
-        errorStatusResult.HandleError();
+        var errorStatus = source.ToErrorStatus(ref offset);
 
-        var errorIndexResult = source.ToErrorIndex(ref offset);
+        var errorIndex = source.ToErrorIndex(ref offset);
 
-        var variableBindingsResult = source.ToVariableBindings(ref offset);
-        variableBindingsResult.HandleError();
+        var variableBindings = source.ToVariableBindings(ref offset);
 
         return new T()
         {
-            PduType = pduTypeResult.Value,
-            RequestId = requestIdResult.Value,
-            ErrorStatus = errorStatusResult.Value,
-            ErrorIndex = errorIndexResult.Value,
-            VariableBindings = variableBindingsResult.Value
+            PduType = pduType,
+            RequestId = requestId,
+            ErrorStatus = errorStatus,
+            ErrorIndex = errorIndex,
+            VariableBindings = variableBindings
         };
     }
 
     internal static byte[] SerializeBase(this SnmpBasePacket packet)
     {
-        var variableBindingsResult = packet.VariableBindings.ToByteArray();
-        variableBindingsResult.HandleError();
+        var variableBindings = packet.VariableBindings.ToVariableBindingsArray();
 
-        var errorIndexValue = packet.ErrorIndex.ToByteArray();
-        errorIndexValue.HandleError();
+        var errorIndex = packet.ErrorIndex.ToErrorIndexArray();
 
-        var errorStatusValue = packet.ErrorStatus.ToByteArray();
-        errorStatusValue.HandleError();
+        var errorStatus = packet.ErrorStatus.ToErrorStatusArray();
 
-        var requestIdValue = packet.RequestId.ToByteArray();
-        requestIdValue.HandleError();
+        var requestIdValue = packet.RequestId.ToRequestIdArray();
 
-        var messageData = requestIdValue.Value
-            .Concat(errorStatusValue.Value)
-            .Concat(errorIndexValue.Value)
-            .Concat(variableBindingsResult.Value)
+        var messageData = requestIdValue
+            .Concat(errorStatus)
+            .Concat(errorIndex)
+            .Concat(variableBindings)
             .ToArray()
-            .ToLength()
-            .Value;
+            .ToArrayWithLength();
 
-        var pduTypeResult = packet.PduType.ToByteArray();
-        pduTypeResult.HandleError();
+        var pduTypeResult = packet.PduType.ToPduTypeArray();
 
-        return pduTypeResult.Value.Concat(messageData).ToArray();
+        return pduTypeResult.Concat(messageData).ToArray();
     }
 }

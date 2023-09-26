@@ -6,10 +6,10 @@ internal static class SnmpV2cConverter
 {
     internal static SnmpPacketV2C SerializeV2c(this byte[] source, int offset)
     {
-        var communityResult = source.ToString(ref offset);
+        var community = source.ToCommunity(ref offset);
 
         var packet = source.SerializeBase<SnmpPacketV2C>(offset);
-        packet.Community = communityResult.Value;
+        packet.Community = community;
 
         return packet;
     }
@@ -18,17 +18,14 @@ internal static class SnmpV2cConverter
     {
         var baseData = packet.SerializeBase();
 
-        var communityResult = packet.Community.ToByteArray();
-        communityResult.HandleError();
+        var community = packet.Community.ToCommunityArray();
 
-        var versionResult = packet.Version.ToByteArray();
-        versionResult.HandleError();
+        var version = packet.Version.ToVersionArray();
 
-        return versionResult.Value
-            .Concat(communityResult.Value)
+        return version
+            .Concat(community)
             .Concat(baseData)
             .ToArray()
-            .ToLength(SnmpConstants.Sequence)
-            .Value;
+            .ToArrayWithLength(SnmpConstants.Sequence);
     }
 }

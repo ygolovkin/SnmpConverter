@@ -4,15 +4,20 @@ namespace SnmpConverter;
 
 internal static class ContextEngineIdExtensions
 {
-    internal static SnmpResult<SnmpEngineId> ToContextEngineId(this byte[] source, ref int offset)
+    internal static SnmpEngineId ToContextEngineId(this byte[] source, SnmpUser user, ref int offset)
     {
-        var length = source.ToLength(ref offset, SnmpValueType.OctetString, x => x!= 0 && x is < 10 or > 24,
-            "Incorrect Context EngineId's length.");
+        var length = source.ToLength(ref offset, SnmpValueType.OctetString, x => x!= 0 && x is < 10 or > 24, "Incorrect Context EngineId's length.");
 
-        var engineId = new byte[length.Value];
-        Buffer.BlockCopy(source, offset, engineId, 0, length.Value);
-        offset += length.Value;
+        var engineId = new byte[length];
+        Buffer.BlockCopy(source, offset, engineId, 0, length);
+        offset += length;
 
-        return new SnmpResult<SnmpEngineId>(new SnmpEngineId(engineId));
+        var contextEngineId = new SnmpEngineId(engineId);
+        if(!contextEngineId.IsEmpty && !contextEngineId.Equals(user.ContextEngineId))
+        {
+            throw new SnmpException("Incorrect user's Context EngineId.");
+        }
+
+        return contextEngineId;
     }
 }

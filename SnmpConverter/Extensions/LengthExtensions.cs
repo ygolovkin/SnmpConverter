@@ -5,72 +5,54 @@ namespace SnmpConverter;
 
 internal static class LengthExtensions
 {
-    internal static SnmpResult<int> ToLength(this byte[] source, ref int offset, Func<int, bool>? predicate, string message)
+    internal static int ToLength(this byte[] source, ref int offset, Func<int, bool>? predicate, string message)
     {
-        var result = source.GetLength(ref offset);
-        result.HandleError(predicate, message);
-        return result;
+        var length = source.ToLength(ref offset);
+        if (predicate is not null && predicate(length))
+        {
+            throw new SnmpException(message);
+        }
+        return length;
     }
 
-    internal static SnmpResult<int> ToLength(this byte[] source, ref int offset)
-    {
-        var result = source.GetLength(ref offset);
-        result.HandleError();
-        return result;
-    }
-
-    internal static SnmpResult<byte[]> ToLength(this int source)
-    {
-        var result = source.GetLength();
-        result.HandleError();
-        return result;
-    }
-
-    internal static SnmpResult<byte[]> ToLength(this byte[] source)
+    internal static byte[] ToArrayWithLength(this byte[] source)
     {
         byte? byteValueType = null;
-        return source.ToLength(byteValueType);
+        return source.ToArrayWithLength(byteValueType);
     }
 
-    internal static SnmpResult<byte[]> ToLength(this byte[] source, SnmpValueType valueType)
+    internal static byte[] ToArrayWithLength(this byte[] source, SnmpValueType valueType)
     {
-        return source.ToLength((byte)valueType);
+        return source.ToArrayWithLength((byte)valueType);
     }
 
-    internal static SnmpResult<byte[]> ToLength(this byte[] source, byte? valueType)
+    internal static byte[] ToArrayWithLength(this byte[] source, byte? valueType)
     {
-        var lengthResult = source.Length.GetLength();
-        lengthResult.HandleError();
+        var length = source.Length.ToLengthArray();
         var valueTypeArray = valueType is null ? Array.Empty<byte>() : new[] { (byte)valueType };
 
-        var result = valueTypeArray
-            .Concat(lengthResult.Value)
+        return valueTypeArray
+            .Concat(length)
             .Concat(source)
             .ToArray();
-
-        return new SnmpResult<byte[]>(result);
     }
 
-    internal static SnmpResult<int> ToLength(this byte[] source, ref int offset, SnmpValueType valueType,
-    Func<int, bool>? predicate, string message)
+    internal static int ToLength(this byte[] source, ref int offset, SnmpValueType valueType, Func<int, bool>? predicate, string message)
     {
         return source.ToLength(ref offset, (byte)valueType, predicate, message);
     }
 
-    internal static SnmpResult<int> ToLength(this byte[] source, ref int offset, byte valueType,
-        Func<int, bool>? predicate, string message)
+    internal static int ToLength(this byte[] source, ref int offset, byte valueType, Func<int, bool>? predicate, string message)
     {
         if (source[offset++] != valueType)
         {
-            return new SnmpResult<int>($"Incorrect type of {valueType}");
+            throw new SnmpException($"Incorrect type of {valueType}");
         }
 
-        var length = source.ToLength(ref offset);
-        length.HandleError(predicate, message);
-        return length;
+        return source.ToLength(ref offset, predicate, message);
     }
 
-    private static SnmpResult<int> GetLength(this byte[] source, ref int offset)
+    internal static int ToLength(this byte[] source, ref int offset)
     {
         int length;
         if ((source[offset] & SnmpConstants.HighByte) == 0)
@@ -87,15 +69,15 @@ internal static class LengthExtensions
                 value |= source[offset++];
                 if (offset > source.Length || (i < length - 1 && offset == source.Length))
                 {
-                    return new SnmpResult<int>("Incorrect value of length");
+                    throw new SnmpException("Incorrect value of length.");
                 }
             }
             length = value;
         }
-        return new SnmpResult<int>(length);
+        return length;
     }
 
-    private static SnmpResult<byte[]> GetLength(this int source)
+    internal static byte[] ToLengthArray(this int source)
     {
         var length = BitConverter.GetBytes(source);
         var buffer = Array.Empty<byte>();
@@ -118,6 +100,6 @@ internal static class LengthExtensions
             header = (byte)(header | SnmpConstants.HighByte);
             buffer = buffer.Prepend(header);
         }
-        return new SnmpResult<byte[]>(buffer);
+        return buffer;
     }
 }

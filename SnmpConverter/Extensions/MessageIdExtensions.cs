@@ -2,8 +2,13 @@
 
 internal static class MessageIdExtensions
 {
-    internal static SnmpResult<int> ToMessageId(this byte[] source, ref int offset)
+    internal static int ToMessageId(this byte[] source, ref int offset)
     {
-        return source.ToInt32(ref offset);
+        return source.ToInt(ref offset);
+    }
+
+    internal static byte[] ToMessageIdArray(this int messageId)
+    {
+        return messageId.ToIntArray();
     }
 }

@@ -59,4 +59,9 @@ public class SnmpUser
     /// User key's hash.
     /// </summary>
     internal byte[]? HashKey { get; set; }
+
+    /// <summary>
+    /// Is User's password and key encoded.
+    /// </summary>
+    internal bool Encoded { get; set; }
 }

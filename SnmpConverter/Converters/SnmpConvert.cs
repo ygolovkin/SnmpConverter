@@ -1,30 +1,31 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace SnmpConverter;
 
 public static class SnmpConvert
 {
-    public static SnmpBasePacket Serialize(this byte[]? source)
+    public static SnmpBasePacket Serialize(this byte[]? source, IEnumerable<SnmpUser>? users = null)
     {
         if (source is null)
         {
             throw new SnmpException("Incorrect format", new ArgumentNullException(nameof(source)));
         }
 
-        return source.Serialize(0, source.Length);
+        return source.Serialize(0, source.Length, users);
     }
 
-    public static SnmpBasePacket Serialize(this byte[]? source, int offset)
+    public static SnmpBasePacket Serialize(this byte[]? source, int offset, IEnumerable<SnmpUser>? users = null)
     {
         if (source is null)
         {
             throw new SnmpException("Incorrect format", new ArgumentNullException(nameof(source)));
         }
 
-        return source.Serialize(offset, source.Length - offset);
+        return source.Serialize(offset, source.Length - offset, users);
     }
 
-    public static SnmpBasePacket Serialize(this byte[]? source, int offset, int length)
+    public static SnmpBasePacket Serialize(this byte[]? source, int offset, int length, IEnumerable<SnmpUser>? users = null)
     {
         if (source is null)
         {
@@ -56,13 +57,18 @@ public static class SnmpConvert
 
         buffer.ToLength(ref offset, x => x < 2, "Array too short");
 
-        var versionResult = buffer.ToVersion(ref offset);
+        var version = buffer.ToVersion(ref offset);
+        var encodedUsers = new List<SnmpUser>();
+        if(version == SnmpVersion.V3)
+        {
+            encodedUsers = users.EncodeUsers();
+        }
 
-        return versionResult.Value switch
+        return version switch
         {
             SnmpVersion.V1 => buffer.SerializeV1(offset),
             SnmpVersion.V2C => buffer.SerializeV2c(offset),
-            SnmpVersion.V3 => buffer.SerializeV3(offset),
+            SnmpVersion.V3 => buffer.SerializeV3(offset, encodedUsers),
             _ => throw new SnmpException("Unsupported version")
         };
     }

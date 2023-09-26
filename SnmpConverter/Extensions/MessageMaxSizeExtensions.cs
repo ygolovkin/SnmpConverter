@@ -2,8 +2,13 @@
 
 internal static class MessageMaxSizeExtensions
 {
-    internal static SnmpResult<int> ToMessageMaxSize(this byte[] source, ref int offset)
+    internal static int ToMessageMaxSize(this byte[] source, ref int offset)
     {
-        return source.ToInt32(ref offset);
+        return source.ToInt(ref offset);
+    }
+
+    internal static byte[] ToMessageMaxSizeArray(this int messageMaxSize)
+    {
+        return messageMaxSize.ToIntArray();
     }
 }

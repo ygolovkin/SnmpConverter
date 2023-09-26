@@ -2,8 +2,13 @@
 
 internal static class ErrorIndexExtensions
 {
-    internal static SnmpResult<int> ToErrorIndex(this byte[] source, ref int offset)
+    internal static int ToErrorIndex(this byte[] source, ref int offset)
     {
-        return source.ToInt32(ref offset);
+        return source.ToInt(ref offset);
+    }
+
+    internal static byte[] ToErrorIndexArray(this int errorIndex)
+    {
+        return errorIndex.ToIntArray();
     }
 }

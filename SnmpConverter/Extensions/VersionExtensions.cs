@@ -2,21 +2,13 @@
 
 internal static class VersionExtensions
 {
-    internal static SnmpResult<SnmpVersion> ToVersion(this byte[] source, ref int offset)
+    internal static SnmpVersion ToVersion(this byte[] source, ref int offset)
     {
-        var intResult = source.ToInt32(ref offset);
-        var versionResult = intResult.Value.ToEnum<SnmpVersion>();
-        
-        return versionResult.Value switch
-        {
-            SnmpVersion.V2C => new SnmpResult<SnmpVersion>(SnmpVersion.V2C),
-            _ => new SnmpResult<SnmpVersion>("Unsupported version")
-        };
+        return source.ToInt(ref offset).ToEnum<SnmpVersion>();
     }
 
-    internal static SnmpResult<byte[]> ToByteArray(this SnmpVersion source)
+    internal static byte[] ToVersionArray(this SnmpVersion source)
     {
-        var intResult = ((int) source).ToByteArray();
-        return intResult.HasError ? new SnmpResult<byte[]>(intResult.Error) : intResult;
+        return ((int) source).ToIntArray();
     }
 }

@@ -4,15 +4,14 @@ using System.Security.Cryptography;
 namespace SnmpConverter;
 internal static class EncryptingExtensions
 {
-    private static bool isSaltIncrement = true;
     private static int salt = -1;
 
-    internal static SnmpResult<byte[]> EncryptByDes(this byte[] source, byte[] key, int engineBoots, out byte[] privacyParameters)
+    internal static byte[] EncryptByDes(this byte[] source, byte[] key, int engineBoots, out byte[] privacyParameters)
     {
         privacyParameters = new byte[8];
         if (key == null || key.Length < 16)
         {
-            return new SnmpResult<byte[]>("Incorrect data.");
+            throw new SnmpException("Incorrect data.");
         }
 
         InitSalt();
@@ -59,10 +58,10 @@ internal static class EncryptingExtensions
         }
 
         des.Clear();
-        return new SnmpResult<byte[]>(result);
+        return result;
     }
 
-    internal static SnmpResult<byte[]> EncryptBy3Des(this byte[] source, byte[] key, int engineBoots, SnmpAuthenticationType authenticationType, out byte[] privacyParameters)
+    internal static byte[] EncryptBy3Des(this byte[] source, byte[] key, int engineBoots, SnmpAuthenticationType authenticationType, out byte[] privacyParameters)
     {
         InitSalt();
         privacyParameters = CreateKey(engineBoots, salt, 8);
@@ -102,30 +101,30 @@ internal static class EncryptingExtensions
             throw new SnmpException("Encrypt error.", ex);
         }
 
-        return new SnmpResult<byte[]>(encryptedData);
+        return encryptedData;
     }
 
-    internal static SnmpResult<byte[]> EncryptByAes128(this byte[] source, byte[] key, int engineBoots, int engineTime, out byte[] privacyParameters)
+    internal static byte[] EncryptByAes128(this byte[] source, byte[] key, int engineBoots, int engineTime, out byte[] privacyParameters)
     {        
         return source.EncryptByAes(key, engineBoots, engineTime, 16, out privacyParameters);
     }
 
-    internal static SnmpResult<byte[]> EncryptByAes192(this byte[] source, byte[] key, int engineBoots, int engineTime, out byte[] privacyParameters)
+    internal static byte[] EncryptByAes192(this byte[] source, byte[] key, int engineBoots, int engineTime, out byte[] privacyParameters)
     {        
         return source.EncryptByAes(key, engineBoots, engineTime, 24, out privacyParameters);
     }
 
-    internal static SnmpResult<byte[]> EncryptByAes256(this byte[] source, byte[] key, int engineBoots, int engineTime, out byte[] privacyParameters)
+    internal static byte[] EncryptByAes256(this byte[] source, byte[] key, int engineBoots, int engineTime, out byte[] privacyParameters)
     {        
         return source.EncryptByAes(key, engineBoots, engineTime, 32, out privacyParameters);
     }
 
-    private static SnmpResult<byte[]> EncryptByAes(this byte[] source, byte[] key, int engineBoots, int engineTime, int keyBytes, out byte[] privacyParameters)
+    private static byte[] EncryptByAes(this byte[] source, byte[] key, int engineBoots, int engineTime, int keyBytes, out byte[] privacyParameters)
     {
         privacyParameters = new byte[8];
         if (key == null || key.Length < keyBytes)
         {
-            return new SnmpResult<byte[]>("Incorrect data.");
+            throw new SnmpException("Incorrect data.");
         }
 
         var iv = CreateKey(engineBoots, engineTime, 16);
@@ -161,9 +160,9 @@ internal static class EncryptingExtensions
         {
             byte[] tmp = new byte[source.Length];
             Buffer.BlockCopy(encryptedData, 0, tmp, 0, source.Length);
-            return new SnmpResult<byte[]>(tmp);
+            return tmp;
         }
-        return new SnmpResult<byte[]>(encryptedData);
+        return encryptedData;
     }
 
     private static byte[] CreateKey(int first, int second, int size)
@@ -190,18 +189,16 @@ internal static class EncryptingExtensions
         if (salt == -1)
         {
             Random rand = new Random();
-            salt = Convert.ToInt32(rand.Next(1, Int32.MaxValue));
+            salt = Convert.ToInt32(rand.Next(1, int.MaxValue));
         }
         else
         {
-            if (isSaltIncrement)
+            salt += 1;
+            if (salt < 0) 
             {
-                salt += 1;
-                if (salt < 0) 
-                {
-                    salt = 1;
-                }
+                salt = 0;
             }
+            
         }
     }
 }
