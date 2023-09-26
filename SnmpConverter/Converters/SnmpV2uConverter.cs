@@ -6,7 +6,7 @@ internal static class SnmpV2uConverter
 {
     internal static SnmpPacketV2U SerializeV2u(this byte[] source, int offset)
     {
-        var community = source.ToString(ref offset).HandleError();
+        var community = source.ToCommunity(ref offset);
 
         var packet = source.SerializeBase<SnmpPacketV2U>(offset);
         packet.Community = community;
@@ -18,15 +18,14 @@ internal static class SnmpV2uConverter
     {
         var baseData = packet.SerializeBase();
 
-        var community = packet.Community.ToByteArray().HandleError();
+        var community = packet.Community.ToCommunityArray();
 
-        var version = packet.Version.ToByteArray().HandleError();
+        var version = packet.Version.ToVersionArray();
 
         return version
             .Concat(community)
             .Concat(baseData)
             .ToArray()
-            .ToLength(SnmpConstants.Sequence)
-            .HandleError();
+            .ToArrayWithLength(SnmpConstants.Sequence);
     }
 }
