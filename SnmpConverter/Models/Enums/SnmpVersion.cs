@@ -16,6 +16,11 @@ public enum SnmpVersion : byte
     V2C = 0x01,
 
     /// <summary>
+    /// SNMP 2u version
+    /// </summary>
+    V2U = 0x02,
+
+    /// <summary>
     /// SNMP 3 version
     /// </summary>
     V3 = 0x03
