@@ -6,17 +6,17 @@ internal static class SnmpBaseConverter
 {
     internal static T SerializeBase<T>(this byte[] source, int offset) where T : SnmpBasePacket, new()
     {
-        var pduType = source.ToPduType(ref offset).HandleError();
+        var pduType = source.ToPduType(ref offset);
 
-        source.ToLength(ref offset).HandleError(x => x < 0, "Array too short.");
+        source.ToLength(ref offset, x => x < 0, "Array too short.");
 
-        var requestId = source.ToRequestId(ref offset).HandleError();
+        var requestId = source.ToRequestId(ref offset);
 
-        var errorStatus = source.ToErrorStatus(ref offset).HandleError();
+        var errorStatus = source.ToErrorStatus(ref offset);
 
-        var errorIndex = source.ToErrorIndex(ref offset).HandleError();
+        var errorIndex = source.ToErrorIndex(ref offset);
 
-        var variableBindings = source.ToVariableBindings(ref offset).HandleError();
+        var variableBindings = source.ToVariableBindings(ref offset);
 
         return new T()
         {
@@ -30,24 +30,23 @@ internal static class SnmpBaseConverter
 
     internal static byte[] SerializeBase(this SnmpBasePacket packet)
     {
-        var variableBindings = packet.VariableBindings.ToByteArray().HandleError();
+        var variableBindings = packet.VariableBindings.ToVariableBindingsArray();
 
-        var errorIndex = packet.ErrorIndex.ToByteArray().HandleError();
+        var errorIndex = packet.ErrorIndex.ToErrorIndexArray();
 
-        var errorStatus = packet.ErrorStatus.ToByteArray().HandleError();
+        var errorStatus = packet.ErrorStatus.ToErrorStatusArray();
 
-        var requestId = packet.RequestId.ToByteArray().HandleError();
+        var requestIdValue = packet.RequestId.ToRequestIdArray();
 
-        var messageData = requestId
+        var messageData = requestIdValue
             .Concat(errorStatus)
             .Concat(errorIndex)
             .Concat(variableBindings)
             .ToArray()
-            .ToLength()
-            .HandleError();
+            .ToArrayWithLength();
 
-        var pduType = packet.PduType.ToByteArray().HandleError();
+        var pduTypeResult = packet.PduType.ToPduTypeArray();
 
-        return pduType.Concat(messageData).ToArray();
+        return pduTypeResult.Concat(messageData).ToArray();
     }
 }

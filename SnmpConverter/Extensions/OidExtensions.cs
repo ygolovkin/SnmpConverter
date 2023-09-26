@@ -4,10 +4,9 @@ namespace SnmpConverter;
 
 internal static class OidExtensions
 {
-    internal static SnmpResult<SnmpOid> ToOid(this byte[] source, ref int offset)
+    internal static SnmpOid ToOid(this byte[] source, ref int offset)
     {
-        var length = source.ToLength(ref offset, SnmpValueType.ObjectIdentifier)
-            .HandleError(x => x < 0, "Incorrect Oid's length.");
+        var length = source.ToLength(ref offset, SnmpValueType.ObjectIdentifier, x => x < 0, "Incorrect Oid's length.");
 
         uint first = source[offset++];
 
@@ -58,10 +57,10 @@ internal static class OidExtensions
             oid.Add(result);
         }
 
-        return new SnmpResult<SnmpOid>(oid);
+        return oid;
     }
 
-    internal static SnmpResult<byte[]> ToByteArray(this SnmpOid snmpOid)
+    internal static byte[] ToOidArray(this SnmpOid snmpOid)
     {
         var array = snmpOid.ToArray();
         var bytes = Array.Empty<byte>();
@@ -77,7 +76,7 @@ internal static class OidExtensions
             bytes = bytes.Append(EncodeInstance(array[i]));
         }
 
-        return bytes.ToLength(SnmpValueType.ObjectIdentifier);
+        return bytes.ToArrayWithLength(SnmpValueType.ObjectIdentifier);
     }
 
     private static byte[] EncodeInstance(uint number)

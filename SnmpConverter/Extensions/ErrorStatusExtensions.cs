@@ -2,14 +2,14 @@
 
 internal static class ErrorStatusExtensions
 {
-    internal static SnmpResult<SnmpErrorStatus> ToErrorStatus(this byte[] source, ref int offset)
+    internal static SnmpErrorStatus ToErrorStatus(this byte[] source, ref int offset)
     {
-        var errorStatus = source.ToInt32(ref offset).HandleError();
+        var errorStatus = source.ToInt(ref offset);
         return errorStatus.ToEnum<SnmpErrorStatus>();
     }
 
-    internal static SnmpResult<byte[]> ToByteArray(this SnmpErrorStatus status)
+    internal static byte[] ToErrorStatusArray(this SnmpErrorStatus status)
     {
-        return ((int)status).ToByteArray();
+        return ((int)status).ToIntArray();
     }
 }

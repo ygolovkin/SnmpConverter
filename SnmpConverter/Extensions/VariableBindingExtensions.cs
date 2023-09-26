@@ -5,39 +5,37 @@ namespace SnmpConverter;
 
 internal static class VariableBindingExtensions
 {
-    internal static SnmpResult<SnmpVariableBinding> ToVariableBinding(this byte[] source, ref int offset)
+    internal static SnmpVariableBinding ToVariableBinding(this byte[] source, ref int offset)
     {
-        source.ToLength(ref offset, SnmpConstants.Sequence)
-            .HandleError(x => x < 0, "Incorrect variable binding's length.");
+        source.ToLength(ref offset, SnmpConstants.Sequence, x => x < 0, "Incorrect variable binding's length.");
 
-        var oid = source.ToOid(ref offset).HandleError();
+        var oid = source.ToOid(ref offset);
 
-        var valueType = source.ToValueType(ref offset).HandleError();
+        var valueType = source.ToValueType(ref offset);
 
-        var value = source.ToValue(ref offset).HandleError();
+        var value = source.ToValue(ref offset);
 
-        var variableBinding = new SnmpVariableBinding
+        return new SnmpVariableBinding
         {
             Oid = oid,
             Type = valueType,
             Value = value
         };
-        return new SnmpResult<SnmpVariableBinding>(variableBinding);
     }
 
-    internal static SnmpResult<byte[]> ToByteArray(this SnmpVariableBinding? variableBinding)
+    internal static byte[] ToVariableBindingArray(this SnmpVariableBinding? variableBinding)
     {
         if (variableBinding?.Oid is null)
         {
-            return new SnmpResult<byte[]>("Incorrect format of variable binding.");
+            throw new SnmpException("Incorrect format of variable binding.");
         }
 
-        var oid = variableBinding.Oid.ToByteArray().HandleError();
+        var oid = variableBinding.Oid.ToOidArray();
 
-        var valueType = variableBinding.Type.ToByteArray().HandleError();
+        var type = variableBinding.Type.ToValueTypeArray();
 
-        var value = variableBinding.Value.ToByteArray().HandleError();
+        var value = variableBinding.Value.ToValueArray();
 
-        return new SnmpResult<byte[]>(oid.Concat(valueType).Concat(value).ToArray());
+        return oid.Concat(type).Concat(value).ToArray();
     }
 }

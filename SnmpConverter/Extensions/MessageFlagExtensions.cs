@@ -2,15 +2,15 @@
 
 internal static class MessageFlagExtensions
 {
-    internal static SnmpResult<SnmpMessageFlag> ToMessageFlag(this byte[] source, ref int offset)
+    internal static SnmpMessageFlag ToMessageFlag(this byte[] source, ref int offset)
     {
-        source.ToLength(ref offset, SnmpValueType.OctetString).HandleError(x => x != 1, "Incorrect octet string's length.");
+        source.ToLength(ref offset, SnmpValueType.OctetString, x => x != 1, "Incorrect octet string's length.");
 
-        return new SnmpResult<SnmpMessageFlag>(new SnmpMessageFlag(source[offset++]));
+        return new SnmpMessageFlag(source[offset++]);
     }
 
-    internal static SnmpResult<byte[]> ToByteArray(this SnmpMessageFlag flag)
+    internal static byte[] ToMessageFlagArray(this SnmpMessageFlag flag)
     {
-        return (new[] { flag.Flag }).ToLength(SnmpValueType.OctetString);
+        return (new[] { flag.Flag }).ToArrayWithLength(SnmpValueType.OctetString);
     }
 }

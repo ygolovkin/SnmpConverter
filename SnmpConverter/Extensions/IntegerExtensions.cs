@@ -4,7 +4,7 @@ namespace SnmpConverter;
 
 internal static class IntegerExtensions
 {
-    internal static SnmpResult<byte[]> ToByteArray(this int source)
+    internal static byte[] ToIntArray(this int source)
     {
         var bytes = BitConverter.GetBytes(source);
 
@@ -58,14 +58,14 @@ internal static class IntegerExtensions
             buffer = buffer.Prepend(0);
         }
 
-        buffer.Length.ToLength().HandleError();
+        buffer.Length.ToLengthArray();
 
-        return buffer.ToLength(SnmpValueType.Integer);
+        return buffer.ToArrayWithLength(SnmpValueType.Integer);
     }
 
-    internal static SnmpResult<int> ToInt32(this byte[] source, ref int offset)
+    internal static int ToInt(this byte[] source, ref int offset)
     {
-        var length = source.ToLength(ref offset, SnmpValueType.Integer).HandleError(x => x is < 0 or > 5, "Incorrect Int32 length");
+        var length = source.ToLength(ref offset, SnmpValueType.Integer, x => x is < 0 or > 5, "Incorrect Int32 length");
 
         var isNegative = (source[offset] & SnmpConstants.HighByte) != 0;
 
@@ -85,6 +85,6 @@ internal static class IntegerExtensions
             value <<= 8;
             value |= source[offset++];
         }
-        return new SnmpResult<int>(value);
+        return value;
     }
 }

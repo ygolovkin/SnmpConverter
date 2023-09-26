@@ -2,8 +2,20 @@
 
 internal static class ContextNameExtensions
 {
-    internal static SnmpResult<string> ToContextName(this byte[] source, ref int offset)
+    internal static string ToContextName(this byte[] source, SnmpEngineId engineId, SnmpUser user, ref int offset)
     {
-        return source.ToString(ref offset);
+        var contextName = source.ToString(ref offset);
+
+        if(!engineId.IsEmpty && contextName != user.ContextName)
+        {
+            throw new SnmpException("Incorrect user's Context Name.");
+        }
+
+        return contextName;
+    }
+
+    internal static byte[] ToContextNameArray(this string? contextName)
+    {
+        return contextName.ToStringArray();
     }
 }

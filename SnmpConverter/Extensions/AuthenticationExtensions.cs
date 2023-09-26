@@ -4,10 +4,9 @@ namespace SnmpConverter;
 
 internal static class AuthenticationExtensions
 {
-    internal static SnmpResult<byte[]> ToAuthenticationParameter(this byte[] source, SnmpEngineId engineId, SnmpUser user, ref int offset)
+    internal static byte[] ToAuthenticationParameter(this byte[] source, SnmpEngineId engineId, SnmpUser user, ref int offset)
     {
-        var length = source.ToLength(ref offset, SnmpValueType.OctetString).HandleError(x => x != 12,
-            "Incorrect authentication parameter's length.");
+        var length = source.ToLength(ref offset, SnmpValueType.OctetString, x => x != 12, "Incorrect authentication parameter's length.");
 
         var parameter = new byte[length];
         var startPosition = offset;
@@ -28,6 +27,11 @@ internal static class AuthenticationExtensions
             }
         }
 
-        return new SnmpResult<byte[]>(parameter);
+        return parameter;
+    }
+
+    internal static byte[] ToAuthenticationParameterArray(this byte[] authenticationParameter)
+    {
+        return authenticationParameter.ToArrayWithLength();
     }
 }

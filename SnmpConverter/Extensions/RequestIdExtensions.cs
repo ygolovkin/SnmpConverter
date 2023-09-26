@@ -2,8 +2,13 @@
 
 internal static class RequestIdExtensions
 {
-    internal static SnmpResult<int> ToRequestId(this byte[] source, ref int offset)
+    internal static int ToRequestId(this byte[] source, ref int offset)
     {
-        return source.ToInt32(ref offset);
+        return source.ToInt(ref offset);
+    }
+
+    internal static byte[] ToRequestIdArray(this int requestId)
+    {
+        return requestId.ToIntArray();
     }
 }

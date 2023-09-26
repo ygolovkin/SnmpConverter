@@ -2,8 +2,13 @@
 
 internal static class EngineBootsExtensions
 {
-    internal static SnmpResult<int> ToEngineBoots(this byte[] source, ref int offset)
+    internal static int ToEngineBoots(this byte[] source, ref int offset)
     {
-        return source.ToInt32(ref offset);
+        return source.ToInt(ref offset);
+    }
+
+    internal static byte[] ToEngineBootsArray(this int engineBoots)
+    {
+        return engineBoots.ToIntArray();
     }
 }

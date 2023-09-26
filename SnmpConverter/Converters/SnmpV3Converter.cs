@@ -1,56 +1,53 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace SnmpConverter;
 
 internal static class SnmpV3Converter
 {
-    internal static SnmpPacketV3 SerializeV3(this byte[] source, int offset)
+    internal static SnmpPacketV3 SerializeV3(this byte[] source, int offset, List<SnmpUser> users)
     {
-        source.ToLength(ref offset, SnmpConstants.Sequence).HandleError(x => x < 5, "Incorrect global data's length.");
+        source.ToLength(ref offset, SnmpConstants.Sequence, x => x < 5, "Incorrect global data's length.");
 
-        var messageId = source.ToMessageId(ref offset).HandleError();
+        var messageId = source.ToMessageId(ref offset);
 
-        var messageMaxSize = source.ToMessageMaxSize(ref offset).HandleError();
+        var messageMaxSize = source.ToMessageMaxSize(ref offset);
 
-        var messageFlag = source.ToMessageFlag(ref offset).HandleError();
+        var messageFlag = source.ToMessageFlag(ref offset);
 
-        var messageSecurityModel = source.ToMessageSecurityModel(ref offset).HandleError();
+        var messageSecurityModel = source.ToMessageSecurityModel(ref offset);
         
-        source.ToLength(ref offset, SnmpValueType.OctetString).HandleError(x => x < 5, "Incorrect global data's length.");
+        source.ToLength(ref offset, SnmpValueType.OctetString, x => x < 5, "Incorrect global data's length.");
         
-        source.ToLength(ref offset, SnmpConstants.Sequence).HandleError(x => x < 5, "Incorrect global data's length.");
+        source.ToLength(ref offset, SnmpConstants.Sequence, x => x < 5, "Incorrect global data's length.");
 
-        var engineId = source.ToEngineId(ref offset).HandleError();
+        var engineId = source.ToEngineId(ref offset);
 
-        var engineBoots = source.ToEngineBoots(ref offset).HandleError();
+        var engineBoots = source.ToEngineBoots(ref offset);
 
-        var engineTime = source.ToEngineTime(ref offset).HandleError();
+        var engineTime = source.ToEngineTime(ref offset);
 
-        var username = source.ToUsername(ref offset).HandleError();
+        var username = source.ToUsername(ref offset);
 
-        var user = SnmpUsers.Get(username).HandleError();
+        var user = users.HandleUsername(username);
 
-        var authenticationParameter = source.ToAuthenticationParameter(engineId, user, ref offset).HandleError();
+        var authenticationParameter = source.ToAuthenticationParameter(engineId, user, ref offset);
 
         var privacyParameter = source.ToPrivacyParameter(
-            engineId,
+            engineId, 
             user,
-            engineBoots,
-            engineTime,
-            ref offset,
-            out var outSource).HandleError();
+            engineBoots, 
+            engineTime, 
+            ref offset, 
+            out var outSource);
         source = outSource;
 
-        source.ToLength(ref offset, SnmpConstants.Sequence).HandleError(x => x < 5, "Incorrect global data's length.");
+        source.ToLength(ref offset, SnmpConstants.Sequence, x => x < 5, "Incorrect global data's length.");
 
-        var contextEngineId = source.ToContextEngineId(ref offset)
-            .HandleError(engineId => !engineId.IsEmpty && !engineId.Equals(user.ContextEngineId),
-                "Incorrect user's Context EngineId.");
+        var contextEngineId = source.ToContextEngineId(user, ref offset);
 
-        var contextName = source.ToContextName(ref offset)
-            .HandleError(x => !engineId.IsEmpty && x != user.ContextName,
-                "Incorrect user's Context Name.");
+        var contextName = source.ToContextName(engineId, user, ref offset);
 
         var packet = source.SerializeBase<SnmpPacketV3>(offset);
         packet.MessageId = messageId;
@@ -75,35 +72,33 @@ internal static class SnmpV3Converter
 
         var baseData = packet.SerializeBase();
 
-        var contextName = packet.ContextName.ToByteArray().HandleError();
+        var contextName = packet.ContextName.ToContextNameArray();
 
-        var contextEngineId = packet.ContextEngineId.ToByteArray().HandleError();
+        var contextEngineId = packet.ContextEngineId.ToEngineIdArray();
 
         var messageData = contextEngineId
             .Concat(contextName)
             .Concat(baseData)
             .ToArray()
-            .ToLength(SnmpConstants.Sequence)
-            .HandleError();
+            .ToArrayWithLength(SnmpConstants.Sequence);
 
-        var privacyParameter = messageData.ToByteArray(
+        var privacyParameter = messageData.ToPrivacyParameterArray(
             packet.User!,
             packet.EngineBoots,
             packet.EngineTime,
-            out var encryptedMessageData)
-            .HandleError();
+            out var encryptedMessageData);
 
         packet.AuthenticationParameter = new byte[12];
-        var authenticationParameter = packet.AuthenticationParameter.ToByteArray().HandleError();
+        var authenticationParameter = packet.AuthenticationParameter.ToAuthenticationParameterArray();
         var hashBackOffset = encryptedMessageData.Length + packet.AuthenticationParameter.Length;
 
-        var username = packet.User!.Name.ToByteArray().HandleError();
+        var username = packet.User!.Name.ToUsernameArray();
 
-        var engineTime = packet.EngineTime.ToByteArray().HandleError();
+        var engineTime = packet.EngineTime.ToEngineTimeArray();
 
-        var engineBoots = packet.EngineBoots.ToByteArray().HandleError();
+        var engineBoots = packet.EngineBoots.ToEngineBootsArray();
 
-        var engineId = packet.EngineId.ToByteArray().HandleError();
+        var engineId = packet.EngineId.ToEngineIdArray();
 
         var messageAuthoritativeData = engineId 
             .Concat(engineBoots) 
@@ -112,36 +107,32 @@ internal static class SnmpV3Converter
             .Concat(authenticationParameter) 
             .Concat(privacyParameter)
             .ToArray()
-            .ToLength(SnmpConstants.Sequence)
-            .HandleError()
-            .ToLength(SnmpValueType.OctetString)
-            .HandleError();
+            .ToArrayWithLength(SnmpConstants.Sequence)
+            .ToArrayWithLength(SnmpValueType.OctetString);
 
-        var messageSecurityModel = packet.MessageSecurityModel.ToByteArray().HandleError();
+        var messageSecurityModel = packet.MessageSecurityModel.ToMessageSecurityModelArray();
 
-        var messageFlag = packet.MessageFlag!.ToByteArray().HandleError();
+        var messageFlag = packet.MessageFlag!.ToMessageFlagArray();
 
-        var messageMaxSize = packet.MessageMaxSize.ToByteArray().HandleError();
+        var messageMaxSize = packet.MessageMaxSize.ToMessageMaxSizeArray();
 
-        var messageId = packet.MessageId.ToByteArray().HandleError();
+        var messageId = packet.MessageId.ToMessageIdArray();
 
         var messageGlobalData = messageId
             .Concat(messageMaxSize)
             .Concat(messageFlag)
             .Concat(messageSecurityModel)
             .ToArray()
-            .ToLength(SnmpConstants.Sequence)
-            .HandleError();
+            .ToArrayWithLength(SnmpConstants.Sequence);
 
-        var version = packet.Version.ToByteArray().HandleError();
+        var version = packet.Version.ToVersionArray();
 
         var buffer = version
             .Concat(messageGlobalData)
             .Concat(messageAuthoritativeData)
             .Concat(encryptedMessageData)
             .ToArray()
-            .ToLength(SnmpConstants.Sequence)
-            .HandleError();
+            .ToArrayWithLength(SnmpConstants.Sequence);
 
         if(packet.User.AuthenticationType != SnmpAuthenticationType.None)
         {
@@ -158,6 +149,8 @@ internal static class SnmpV3Converter
         {
             throw new SnmpException("Incorrect user.", new ArgumentException(nameof(packet.User)));
         }
+
+        packet.User.CheckUser();
 
         if(packet.MessageFlag is null)
         {

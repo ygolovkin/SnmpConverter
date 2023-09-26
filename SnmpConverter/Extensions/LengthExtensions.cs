@@ -5,25 +5,79 @@ namespace SnmpConverter;
 
 internal static class LengthExtensions
 {
-    internal static SnmpResult<byte[]> ToLength(this byte[] source, SnmpValueType valueType)
+    internal static int ToLength(this byte[] source, ref int offset, Func<int, bool>? predicate, string message)
     {
-        return source.ToLength((byte)valueType);
+        var length = source.ToLength(ref offset);
+        if (predicate is not null && predicate(length))
+        {
+            throw new SnmpException(message);
+        }
+        return length;
     }
 
-    internal static SnmpResult<byte[]> ToLength(this byte[] source, byte? valueType = null)
+    internal static byte[] ToArrayWithLength(this byte[] source)
     {
-        var length = source.Length.ToLength().HandleError();
+        byte? byteValueType = null;
+        return source.ToArrayWithLength(byteValueType);
+    }
+
+    internal static byte[] ToArrayWithLength(this byte[] source, SnmpValueType valueType)
+    {
+        return source.ToArrayWithLength((byte)valueType);
+    }
+
+    internal static byte[] ToArrayWithLength(this byte[] source, byte? valueType)
+    {
+        var length = source.Length.ToLengthArray();
         var valueTypeArray = valueType is null ? Array.Empty<byte>() : new[] { (byte)valueType };
 
-        var result = valueTypeArray
+        return valueTypeArray
             .Concat(length)
             .Concat(source)
             .ToArray();
-
-        return new SnmpResult<byte[]>(result);
     }
 
-    internal static SnmpResult<byte[]> ToLength(this int source)
+    internal static int ToLength(this byte[] source, ref int offset, SnmpValueType valueType, Func<int, bool>? predicate, string message)
+    {
+        return source.ToLength(ref offset, (byte)valueType, predicate, message);
+    }
+
+    internal static int ToLength(this byte[] source, ref int offset, byte valueType, Func<int, bool>? predicate, string message)
+    {
+        if (source[offset++] != valueType)
+        {
+            throw new SnmpException($"Incorrect type of {valueType}");
+        }
+
+        return source.ToLength(ref offset, predicate, message);
+    }
+
+    internal static int ToLength(this byte[] source, ref int offset)
+    {
+        int length;
+        if ((source[offset] & SnmpConstants.HighByte) == 0)
+        {
+            length = source[offset++];
+        }
+        else
+        {
+            length = source[offset++] & ~SnmpConstants.HighByte;
+            var value = 0;
+            for (var i = 0; i < length; i++)
+            {
+                value <<= 8;
+                value |= source[offset++];
+                if (offset > source.Length || (i < length - 1 && offset == source.Length))
+                {
+                    throw new SnmpException("Incorrect value of length.");
+                }
+            }
+            length = value;
+        }
+        return length;
+    }
+
+    internal static byte[] ToLengthArray(this int source)
     {
         var length = BitConverter.GetBytes(source);
         var buffer = Array.Empty<byte>();
@@ -46,47 +100,6 @@ internal static class LengthExtensions
             header = (byte)(header | SnmpConstants.HighByte);
             buffer = buffer.Prepend(header);
         }
-        return new SnmpResult<byte[]>(buffer);
-    }
-
-
-    internal static SnmpResult<int> ToLength(this byte[] source, ref int offset, SnmpValueType valueType)
-    {
-        return source.ToLength(ref offset, (byte)valueType);
-    }
-
-    internal static SnmpResult<int> ToLength(this byte[] source, ref int offset, byte valueType)
-    {
-        if (source[offset++] != valueType)
-        {
-            return new SnmpResult<int>($"Incorrect type of {valueType}");
-        }
-
-        return source.ToLength(ref offset);
-    }
-
-    internal static SnmpResult<int> ToLength(this byte[] source, ref int offset)
-    {
-        int length;
-        if ((source[offset] & SnmpConstants.HighByte) == 0)
-        {
-            length = source[offset++];
-        }
-        else
-        {
-            length = source[offset++] & ~SnmpConstants.HighByte;
-            var value = 0;
-            for (var i = 0; i < length; i++)
-            {
-                value <<= 8;
-                value |= source[offset++];
-                if (offset > source.Length || (i < length - 1 && offset == source.Length))
-                {
-                    return new SnmpResult<int>("Incorrect value of length");
-                }
-            }
-            length = value;
-        }
-        return new SnmpResult<int>(length);
+        return buffer;
     }
 }

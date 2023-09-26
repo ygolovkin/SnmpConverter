@@ -6,10 +6,10 @@ internal static class SnmpV1Converter
 {
     internal static SnmpPacketV1 SerializeV1(this byte[] source, int offset)
     {
-        var community = source.ToString(ref offset).HandleError();
+        var communityResult = source.ToCommunity(ref offset);
 
         var packet = source.SerializeBase<SnmpPacketV1>(offset);
-        packet.Community = community;
+        packet.Community = communityResult;
 
         return packet;
     }
@@ -18,15 +18,14 @@ internal static class SnmpV1Converter
     {
         var baseData = packet.SerializeBase();
 
-        var community = packet.Community.ToByteArray().HandleError();
+        var community = packet.Community.ToCommunityArray();
 
-        var version = packet.Version.ToByteArray().HandleError();
+        var version = packet.Version.ToVersionArray();
 
         return version
             .Concat(community)
             .Concat(baseData)
             .ToArray()
-            .ToLength(SnmpConstants.Sequence)
-            .HandleError();
+            .ToArrayWithLength(SnmpConstants.Sequence);
     }
 }
