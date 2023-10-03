@@ -4,10 +4,14 @@
     <Nullable>enable</Nullable>
     <LangVersion>latest</LangVersion>
     <TargetFrameworks>net7.0</TargetFrameworks>
+    <Title>SnmpExtensions</Title>
+    <Authors>Yuri Golovkin</Authors>
+    <RepositoryUrl>https://github.com/ygolovkin/SnmpConverter</RepositoryUrl>
+    <PackageTags>snmp</PackageTags>
   </PropertyGroup>
 
   <ItemGroup>
-	  <InternalsVisibleTo Include="SnmpConverter.Tests"/>
+	  <InternalsVisibleTo Include="SnmpConverter.Tests" />
   </ItemGroup>
 
 </Project>
