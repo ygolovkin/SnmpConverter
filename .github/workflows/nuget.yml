@@ -4,11 +4,6 @@ on:
   push:
     branches: [ "master" ]
 
-env:
-    PROJECT_PATH: 'SnmpConverter\SnmpConverter.csproj'
-    PACKAGE_OUTPUT_DIRECTORY: ${{ github.workspace }}/output
-    NUGET_SOURCE_URL: 'https://api.nuget.org/v3/index.json'
-    
 jobs:
   deploy:
     name: Deploy
@@ -23,13 +18,13 @@ jobs:
         dotnet-version: 7.0.x
 
     - name: Restore packages
-      run: dotnet restore ${{ env.PROJECT_PATH }}
+      run: dotnet restore
 
     - name: Build project
-      run: dotnet build ${{ env.PROJECT_PATH }} --no-restore --configuration Release
+      run: dotnet build --no-restore --configuration Release
 
     - name: Pack project
-      run: dotnet pack ${{ env.PROJECT_PATH }} --no-restore --no-build --configuration Release --include-symbols -p:PackageVersion=${{ github.VERSION }} --output ${{ env.PACKAGE_OUTPUT_DIRECTORY }}
+      run: dotnet pack --configuration Release /p:Version=${{ vars.VERSION }} --no-build --output .
 
     - name: Push packages
-      run: dotnet nuget push ${{ env.PACKAGE_OUTPUT_DIRECTORY }}\*.nupkg -k ${{ secrets.NUGET_AUTH_TOKEN }} -s ${{ env.NUGET_SOURCE_URL }}
+      run: dotnet nuget push SnmpConverter.${{ vars.VERSION }}.nupkg --source https://api.nuget.org/v3/index.json --api-key ${{ secrets.NUGET_AUTH_TOKEN }}
