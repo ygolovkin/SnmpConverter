@@ -32,6 +32,4 @@ jobs:
       run: dotnet pack --configuration Release /p:Version=${{ vars.VERSION }} --no-build --output .
 
     - name: Push packages
-      run: dotnet nuget push NuGet.Workflow.${{ vars.VERSION }}.nupkg --source https://api.nuget.org/v3/index.json --api-key ${NUGET_AUTH_TOKEN}
-      env:
-        GITHUB_TOKEN: ${{ secrets.NUGET_AUTH_TOKEN }}
+      run: dotnet nuget push NuGet.Workflow.${{ vars.VERSION }}.nupkg --source https://api.nuget.org/v3/index.json --api-key ${{ secrets.NUGET_AUTH_TOKEN }}
