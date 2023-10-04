@@ -29,7 +29,7 @@ jobs:
       run: dotnet build --no-restore --configuration Release
 
     - name: Pack project
-      run: dotnet pack --configuration Release /p:Version=${{ vars.VERSION }} --no-build --outpu
+      run: dotnet pack --configuration Release /p:Version=${{ vars.VERSION }} --no-build --output
 
     - name: Push packages
       run: dotnet nuget push NuGet.Workflow.${{ vars.VERSION }}.nupkg --source https://nuget.pkg.github.com/acraven/index.json --api-key ${NUGET_AUTH_TOKEN}
