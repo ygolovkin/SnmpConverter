@@ -20,7 +20,7 @@ jobs:
         dotnet-version: 7.0.x
 
     - name: Version of nuget
-      run: echo "Version is ${ github.VERSION }"
+      run: echo "Version is ${{ vars.VERSION }}"
 
     - name: Restore packages
       run: dotnet restore
@@ -29,9 +29,9 @@ jobs:
       run: dotnet build --no-restore --configuration Release
 
     - name: Pack project
-      run: dotnet pack --configuration Release /p:Version=${ github.VERSION } --no-build --outpu
+      run: dotnet pack --configuration Release /p:Version=${{ vars.VERSION }} --no-build --outpu
 
     - name: Push packages
-      run: dotnet nuget push NuGet.Workflow.${github.VERSION}.nupkg --source https://nuget.pkg.github.com/acraven/index.json --api-key ${NUGET_AUTH_TOKEN}
+      run: dotnet nuget push NuGet.Workflow.${{ vars.VERSION }}.nupkg --source https://nuget.pkg.github.com/acraven/index.json --api-key ${NUGET_AUTH_TOKEN}
       env:
         GITHUB_TOKEN: ${{ secrets.NUGET_AUTH_TOKEN }}
