@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SnmpConverter.Extensions;
+using System;
 
 namespace SnmpConverter;
 

@@ -1,7 +1,4 @@
-﻿using System;
-using System.Linq;
-
-namespace SnmpConverter;
+﻿namespace SnmpConverter.Extensions;
 
 internal static class ArrayExtensions
 {

@@ -1,17 +1,19 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <Nullable>enable</Nullable>
     <LangVersion>latest</LangVersion>
-    <TargetFrameworks>net7.0</TargetFrameworks>
+    <TargetFrameworks>net8.0</TargetFrameworks>
     <Title>SnmpExtensions</Title>
     <Authors>Yuri Golovkin</Authors>
     <RepositoryUrl>https://github.com/ygolovkin/SnmpConverter</RepositoryUrl>
     <PackageTags>snmp</PackageTags>
+
+    <Nullable>disable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
   <ItemGroup>
-	  <InternalsVisibleTo Include="SnmpConverter.Tests" />
+    <InternalsVisibleTo Include="SnmpConverter.Tests" />
   </ItemGroup>
 
 </Project>
