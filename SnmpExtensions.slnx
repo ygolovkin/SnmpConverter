@@ -1,0 +1,4 @@
+﻿<Solution>
+  <Project Path="SnmpConverter\SnmpConverter.csproj" />
+  <Project Path="SnmpConvrter.Tests\SnmpConverter.Tests.csproj" />
+</Solution>
