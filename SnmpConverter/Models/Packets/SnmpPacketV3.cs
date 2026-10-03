@@ -1,4 +1,4 @@
-﻿namespace SnmpConverter;
+﻿namespace SnmpConverter.Models.Packets;
 
 /// <summary>
 /// SNMP packet version 3.
@@ -28,7 +28,7 @@ public class SnmpPacketV3 : SnmpBasePacket
     /// <summary>
     /// SNMP <see cref="SnmpEngineId">engine identifier</see>.
     /// </summary>
-    public SnmpEngineId? EngineId { get; set; }
+    public SnmpEngineId EngineId { get; set; }
 
     /// <summary>
     /// SNMP engine boots.
@@ -43,27 +43,27 @@ public class SnmpPacketV3 : SnmpBasePacket
     /// <summary>
     /// SNMP <see cref="SnmpUser">user</see>.
     /// </summary>
-    public SnmpUser? User { get; set; }
+    public SnmpUser User { get; set; }
 
     /// <summary>
     /// SNMP authentication parameter.
     /// </summary>
-    public byte[]? AuthenticationParameter { get; set; }
+    public byte[] AuthenticationParameter { get; set; }
 
     /// <summary>
     /// SNMP privacy parameter.
     /// </summary>
-    public byte[]? PrivacyParameter { get; set; }
+    public byte[] PrivacyParameter { get; set; }
 
     /// <summary>
     /// SNMP context <see cref="SnmpEngineId">engine identifier</see>.
     /// </summary>
-    public SnmpEngineId? ContextEngineId { get; set; }
+    public SnmpEngineId ContextEngineId { get; set; }
 
     /// <summary>
     /// SNMP context name.
     /// </summary>
-    public string? ContextName { get; set; }
+    public string ContextName { get; set; }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="SnmpPacketV3"/> class.

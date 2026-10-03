@@ -1,4 +1,6 @@
-﻿namespace SnmpConverter;
+﻿using SnmpConverter.Models.Enums;
+
+namespace SnmpConverter;
 
 /// <summary>
 /// SNMP user.
