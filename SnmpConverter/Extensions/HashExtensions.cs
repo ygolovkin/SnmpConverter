@@ -1,8 +1,8 @@
-﻿using System;
+﻿using SnmpConverter.Models.Enums;
 using System.Security.Cryptography;
 using System.Text;
 
-namespace SnmpConverter;
+namespace SnmpConverter.Extensions;
 
 internal static class HashExtensions
 {
@@ -10,23 +10,24 @@ internal static class HashExtensions
     {
         if (user.AuthenticationType == SnmpAuthenticationType.None)
         {
-            user.HashPassword = Array.Empty<byte>();
+            user.HashPassword = [];
         }
 
-        user.HashPassword = Encoding.UTF8.GetBytes(user.Password!)
-            .HashPassword(user.EngineId!.ToArray(), user.AuthenticationType);
+        user.HashPassword = Encoding.UTF8
+            .GetBytes(user.Password)
+            .HashPassword(user.EngineId.ToArray(), user.AuthenticationType);
     }
 
     internal static void HashKey(this SnmpUser user)
     {
         if (user.PrivacyType == SnmpPrivacyType.None)
         {
-            user.HashKey = Array.Empty<byte>();
+            user.HashKey = [];
         }
-        
-        var key = Encoding.UTF8.GetBytes(user.Key!);
-        var hashKey = key.HashPassword(user.EngineId!.ToArray(), user.AuthenticationType);
-        var engineId = user.EngineId!.ToArray();
+
+        byte[] key = Encoding.UTF8.GetBytes(user.Key);
+        byte[] hashKey = key.HashPassword(user.EngineId.ToArray(), user.AuthenticationType);
+        byte[] engineId = user.EngineId.ToArray();
 
         user.HashKey = user.PrivacyType switch
         {
@@ -47,20 +48,20 @@ internal static class HashExtensions
         return buffer.GetHash(user.AuthenticationType, user.HashPassword);
     }
 
-    internal static byte[] GetHash(this byte[] buffer, SnmpAuthenticationType authenticationType, byte[]? key = null)
+    internal static byte[] GetHash(this byte[] buffer, SnmpAuthenticationType authenticationType, byte[] key = null)
     {
-        if(authenticationType == SnmpAuthenticationType.None)
+        if (authenticationType == SnmpAuthenticationType.None)
         {
             return buffer;
         }
 
-        HMAC hmac = key is null
-            ? authenticationType == SnmpAuthenticationType.MD5 
-                ? new HMACMD5() 
-                : new HMACSHA1()
-            : authenticationType == SnmpAuthenticationType.MD5 
-                ? new HMACMD5(key) 
-                : new HMACSHA1(key);
+        HMAC hmac = authenticationType switch
+        {
+            SnmpAuthenticationType.MD5 => key is null ? new HMACMD5() : new HMACMD5(key),
+            SnmpAuthenticationType.SHA1 => key is null ? new HMACSHA1() : new HMACSHA1(key),
+            SnmpAuthenticationType.SHA256 => key is null ? new HMACSHA256() : new HMACSHA256(key),
+            SnmpAuthenticationType.SHA384 => key is null ? new HMACSHA384() : new HMACSHA384(key),
+        };
 
         var hash = hmac.ComputeHash(buffer, 0, buffer.Length);
         var result = new byte[12];
@@ -83,9 +84,14 @@ internal static class HashExtensions
             Buffer.BlockCopy(password, 0, bytes, password.Length * count, remainder);
         }
 
-        HashAlgorithm hashAlgorithm = authenticationType == SnmpAuthenticationType.MD5
-            ? MD5.Create()
-            : SHA1.Create();
+        HashAlgorithm hashAlgorithm = authenticationType switch
+        {
+            SnmpAuthenticationType.MD5 => MD5.Create(),
+            SnmpAuthenticationType.SHA1 => SHA1.Create(),
+            SnmpAuthenticationType.SHA256 => SHA256.Create(),
+            SnmpAuthenticationType.SHA384 => SHA384.Create(),
+        };
+
         var hash = hashAlgorithm.ComputeHash(bytes);
 
         var buffer = new byte[hash.Length + hash.Length + engineId.Length];
@@ -101,17 +107,23 @@ internal static class HashExtensions
 
     private static byte[] ExtendShortKey3DES(this byte[] hasKey, byte[] engineId, SnmpAuthenticationType authenticationType)
     {
-        var length = hasKey.Length;
+        int length = hasKey.Length;
 
-        var minBytesLength = authenticationType == SnmpAuthenticationType.MD5 ? 16 : 20;
+        int minBytesLength = authenticationType switch
+        {
+            SnmpAuthenticationType.MD5 => 16,
+            SnmpAuthenticationType.SHA1 => 20,
+            SnmpAuthenticationType.SHA256 => 32,
+            SnmpAuthenticationType.SHA384 => 48,
+        };
 
-        var extendedKey = new byte[32];
+        byte[] extendedKey = new byte[32];
         Buffer.BlockCopy(hasKey, 0, extendedKey, 0, hasKey.Length);
 
         while (length < 32)
         {
-            var key = hasKey.HashPassword(engineId, authenticationType);
-            var copyBytes = Math.Min(32 - length, minBytesLength);
+            byte[] key = hasKey.HashPassword(engineId, authenticationType);
+            int copyBytes = Math.Min(32 - length, minBytesLength);
 
             Buffer.BlockCopy(key, 0, extendedKey, length, copyBytes);
             length += copyBytes;

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SnmpConverter.Models.Packets;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 

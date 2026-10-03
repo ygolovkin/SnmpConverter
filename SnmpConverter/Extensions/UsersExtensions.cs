@@ -1,4 +1,6 @@
-﻿using System;
+﻿using SnmpConverter.Extensions;
+using SnmpConverter.Models.Enums;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 

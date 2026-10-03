@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SnmpConverter.Models.Enums;
+using System;
 
 namespace SnmpConverter;
 
