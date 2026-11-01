@@ -1,9 +1,8 @@
-﻿using SnmpConverter.Models.Packets;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using SnmpConverter.Extensions;
+using SnmpConverter.Models.Enums;
+using SnmpConverter.Models.Packets;
 
-namespace SnmpConverter;
+namespace SnmpConverter.Converters;
 
 internal static class SnmpV3Converter
 {
@@ -18,9 +17,9 @@ internal static class SnmpV3Converter
         var messageFlag = source.ToMessageFlag(ref offset);
 
         var messageSecurityModel = source.ToMessageSecurityModel(ref offset);
-        
+
         source.ToLength(ref offset, SnmpValueType.OctetString, x => x < 5, "Incorrect global data's length.");
-        
+
         source.ToLength(ref offset, SnmpConstants.Sequence, x => x < 5, "Incorrect global data's length.");
 
         var engineId = source.ToEngineId(ref offset);
@@ -36,11 +35,11 @@ internal static class SnmpV3Converter
         var authenticationParameter = source.ToAuthenticationParameter(engineId, user, ref offset);
 
         var privacyParameter = source.ToPrivacyParameter(
-            engineId, 
+            engineId,
             user,
-            engineBoots, 
-            engineTime, 
-            ref offset, 
+            engineBoots,
+            engineTime,
+            ref offset,
             out var outSource);
         source = outSource;
 
@@ -101,11 +100,11 @@ internal static class SnmpV3Converter
 
         var engineId = packet.EngineId.ToEngineIdArray();
 
-        var messageAuthoritativeData = engineId 
-            .Concat(engineBoots) 
-            .Concat(engineTime) 
-            .Concat(username) 
-            .Concat(authenticationParameter) 
+        var messageAuthoritativeData = engineId
+            .Concat(engineBoots)
+            .Concat(engineTime)
+            .Concat(username)
+            .Concat(authenticationParameter)
             .Concat(privacyParameter)
             .ToArray()
             .ToArrayWithLength(SnmpConstants.Sequence)
@@ -135,7 +134,7 @@ internal static class SnmpV3Converter
             .ToArray()
             .ToArrayWithLength(SnmpConstants.Sequence);
 
-        if(packet.User.AuthenticationType != SnmpAuthenticationType.None)
+        if (packet.User.AuthenticationType != SnmpAuthenticationType.None)
         {
             var hash = buffer.GetHash(packet.User);
             Buffer.BlockCopy(hash, 0, buffer, buffer.Length - hashBackOffset, hash.Length);
@@ -146,14 +145,14 @@ internal static class SnmpV3Converter
 
     private static void CheckPacket(SnmpPacketV3 packet)
     {
-        if(packet.User is null)
+        if (packet.User is null)
         {
             throw new SnmpException("Incorrect user.", new ArgumentException(nameof(packet.User)));
         }
 
         packet.User.CheckUser();
 
-        if(packet.MessageFlag is null)
+        if (packet.MessageFlag is null)
         {
             throw new SnmpException("Incorrect message flag.", new ArgumentException(nameof(packet.MessageFlag)));
         }

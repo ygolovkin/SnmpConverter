@@ -1,3 +1,5 @@
+using SnmpConverter.Extensions;
+using SnmpConverter.Models.Enums;
 using System;
 using System.Security.Cryptography;
 
